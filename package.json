@@ -1,0 +1,15 @@
+{
+  "name": "NavigationMesh",
+  "version": "1.0.0",
+  "description": "## Timeline ### Day 1 * Camera * User Interface and button clicks * Polygon addition * Polygon Mutation",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "js-clipper": "^1.0.1"
+  }
+}
