@@ -74,15 +74,17 @@
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__interface__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__map__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_vector__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_colors__ = __webpack_require__(7);
 
 
 
 
+
+const GRID = 20;
 class Main {
   constructor(canvas) {
     this.canvas = canvas;
-    this.width = this.canvas.getAttribute("width");
-    this.height = this.canvas.getAttribute("height");
+    this.setSize();
 
     this.map = new __WEBPACK_IMPORTED_MODULE_1__map__["a" /* default */]();
     this.interface = new __WEBPACK_IMPORTED_MODULE_0__interface__["a" /* default */](this.map);
@@ -106,15 +108,14 @@ class Main {
 
   update() {
     const delta = new Date().getTime() - this.currentTime;
-    this.asteroidGenTimer -= delta;
     this._update(delta);
     this.currentTime += delta;
   }
 
   draw(ctx) {
-    for (var i = this.gameObjects.length - 1; i >= 0; i--) {
+    this._drawGrid(ctx);
+    for (var i = this.gameObjects.length - 1; i >= 0; i--)
       this.gameObjects[i].draw(ctx);
-    }
   }
 
 
@@ -122,7 +123,35 @@ class Main {
 
   }
 
+  _drawGrid(ctx) {
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_3__utils_colors__["a" /* GRID_LINES */];
+    ctx.lineWidth = .1;
+    for(let x=0;x<this.width;x+=GRID) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, this.height);
+    }
+    for(let y=0;y<this.height;y+=GRID) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.width, y);
+    }
+    ctx.stroke();
+    ctx.lineWidth = .2;
+    for(let x=0;x<this.width;x+=GRID*5) {
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, this.height);
+    }
+    for(let y=0;y<this.height;y+=GRID*5) {
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.width, y);
+    }
+    ctx.stroke();
+  }
+
   /********* EVENT LISTENERS ***********/
+  setSize() {
+    this.width = this.canvas.getAttribute("width");
+    this.height = this.canvas.getAttribute("height");
+  }
   keyDown(keyCode) {
 
   }
@@ -188,6 +217,7 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener("mouseup", main.mouseup.bind(main));
   window.addEventListener("mousewheel", main.mousewheel.bind(main));
   window.addEventListener("DOMMouseScroll", main.mousewheel.bind(main));
+  window.addEventListener("resize", main.setSize.bind(main));
 });
 
 
@@ -264,7 +294,7 @@ class Interface {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__colors__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_colors__ = __webpack_require__(7);
 
 
 
@@ -284,8 +314,8 @@ class Map {
   }
 
   draw(ctx) {
-    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__colors__["a" /* BLUEPRINT */];
-    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__colors__["b" /* BORDER */];
+    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["b" /* BLUEPRINT */];
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["c" /* BORDER */];
     ctx.lineWidth = 5;
     for(let i=0;i<this.paths.length;i++) {
       const path = this.paths[i];
@@ -7362,15 +7392,19 @@ class Vector {
 
 
 /***/ }),
-/* 6 */
+/* 6 */,
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-const BLUEPRINT = "#0e609c";
-/* harmony export (immutable) */ __webpack_exports__["a"] = BLUEPRINT;
-
 const BORDER = "white";
-/* harmony export (immutable) */ __webpack_exports__["b"] = BORDER;
+/* harmony export (immutable) */ __webpack_exports__["c"] = BORDER;
+
+const BLUEPRINT = "#0e609c";
+/* harmony export (immutable) */ __webpack_exports__["b"] = BLUEPRINT;
+
+const GRID_LINES = "white";
+/* harmony export (immutable) */ __webpack_exports__["a"] = GRID_LINES;
 
 
 

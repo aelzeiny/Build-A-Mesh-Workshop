@@ -18,4 +18,5 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener("mouseup", main.mouseup.bind(main));
   window.addEventListener("mousewheel", main.mousewheel.bind(main));
   window.addEventListener("DOMMouseScroll", main.mousewheel.bind(main));
+  window.addEventListener("resize", main.setSize.bind(main));
 });
