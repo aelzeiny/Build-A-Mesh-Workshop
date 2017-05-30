@@ -31,7 +31,15 @@ class Main {
   }
 
   mousedown(pt) {
+    this.mouseDrag = true;
+  }
 
+  mousemove() {
+
+  }
+
+  mouseup(pt) {
+    this.mouseDrag = false;
   }
 }
 

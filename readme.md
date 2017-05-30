@@ -14,7 +14,6 @@
 ### Day 3
 * A* Implementation part (2)
 * Add storyboarding events and skip buttons
-* 
 
 ### Day 4
 * Submit project & polish
