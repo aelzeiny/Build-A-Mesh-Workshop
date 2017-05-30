@@ -200,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function() {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__);
 
 
+const EPSILON = 10;
 class Interface {
   constructor(map) {
     this.map = map;
@@ -211,14 +212,21 @@ class Interface {
   mousedown(pt) {
     this.mouseDrag = true;
     let point = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__["IntPoint"](pt.x, pt.y);
-    this.currPath.push(point);
+    if(this.currPath.length > 2 &&
+       Math.abs(this.currPath[0].X - pt.x) < EPSILON &&
+       Math.abs(this.currPath[0].Y - pt.y) < EPSILON){
+         this.closePath();
+     }
+     else
+      this.currPath.push(point);
+
   }
 
   mousemove(pt) {
     if(this.mouseDrag) {
-      // const currPt = this.currPath[this.currPath.length-1];
-      // currPt.X = e.clientX;
-      // currPt.Y = e.clientY;
+      const currPt = this.currPath[this.currPath.length-1];
+      currPt.X = pt.x;
+      currPt.Y = pt.y;
     }
   }
 
@@ -226,14 +234,19 @@ class Interface {
     this.mouseDrag = false;
   }
 
+  closePath() {
+    this.map.addPath(this.currPath);
+    this.currPath = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__["Path"]();
+  }
+
   draw(ctx) {
     for(let i=0;i<this.currPath.length;i++) {
       ctx.beginPath();
       const pt = this.currPath[i];
-      ctx.arc(pt.X, pt.Y, 15, 0, 2 * Math.PI, false);
-      ctx.fillStyle = 'green';
+      ctx.arc(pt.X, pt.Y, 5, 0, 2 * Math.PI, false);
+      ctx.fillStyle = 'transparent';
       ctx.fill();
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 1;
       ctx.strokeStyle = '#003300';
       ctx.stroke();
       ctx.closePath();
@@ -257,8 +270,12 @@ class Map {
     this.clipper = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__["Clipper"]();
   }
 
-  draw(ctx) {
+  addPath(path) {
     
+  }
+
+  draw(ctx) {
+
   }
 }
 /* harmony default export */ __webpack_exports__["a"] = (Map);
