@@ -228,6 +228,8 @@ document.addEventListener("DOMContentLoaded", function() {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_colors__ = __webpack_require__(7);
+
 
 
 const EPSILON = 10;
@@ -255,8 +257,10 @@ class Interface {
   mousemove(pt) {
     if(this.mouseDrag) {
       const currPt = this.currPath[this.currPath.length-1];
-      currPt.X = pt.x;
-      currPt.Y = pt.y;
+      if(currPt) { // Ensure that mouse is not dragged after after a poly has been added to map
+        currPt.X = pt.x;
+        currPt.Y = pt.y;
+      }
     }
   }
 
@@ -270,17 +274,16 @@ class Interface {
   }
 
   draw(ctx) {
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["b" /* BORDER */];
     for(let i=0;i<this.currPath.length;i++) {
-      ctx.beginPath();
       const pt = this.currPath[i];
-      ctx.arc(pt.X, pt.Y, 5, 0, 2 * Math.PI, false);
-      ctx.fillStyle = 'transparent';
-      ctx.fill();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = '#003300';
-      ctx.stroke();
-      ctx.closePath();
+      ctx.lineTo(pt.X, pt.Y);
+      ctx.rect(pt.X - 2.5, pt.Y - 2.5, 5, 5);
     }
+    ctx.fill();
+    ctx.stroke();
   }
 }
 
@@ -302,6 +305,7 @@ class Map {
   constructor() {
     this.clipper = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["Clipper"]();
     this.paths = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["Paths"]();
+    this.holesI = new Array();
   }
 
   addPath(path) {
@@ -314,8 +318,8 @@ class Map {
   }
 
   draw(ctx) {
-    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["b" /* BLUEPRINT */];
-    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["c" /* BORDER */];
+    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["c" /* BLUEPRINT */];
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["b" /* BORDER */];
     ctx.lineWidth = 5;
     for(let i=0;i<this.paths.length;i++) {
       const path = this.paths[i];
@@ -7398,10 +7402,10 @@ class Vector {
 
 "use strict";
 const BORDER = "white";
-/* harmony export (immutable) */ __webpack_exports__["c"] = BORDER;
+/* harmony export (immutable) */ __webpack_exports__["b"] = BORDER;
 
 const BLUEPRINT = "#0e609c";
-/* harmony export (immutable) */ __webpack_exports__["b"] = BLUEPRINT;
+/* harmony export (immutable) */ __webpack_exports__["c"] = BLUEPRINT;
 
 const GRID_LINES = "white";
 /* harmony export (immutable) */ __webpack_exports__["a"] = GRID_LINES;
