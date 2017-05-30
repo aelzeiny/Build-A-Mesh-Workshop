@@ -1,4 +1,8 @@
 canvas {
-  background-color: aliceblue;
-  border: 1px black dashed;
+  background-color: #0e609c;
+  border: 1px white dashed;
+}
+
+body {
+  background-color: #0e609c;
 }

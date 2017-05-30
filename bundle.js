@@ -262,20 +262,41 @@ class Interface {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__colors__ = __webpack_require__(6);
+
+
 
 class Map {
   constructor() {
-    this.clipper = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper_js__["Clipper"]();
+    this.clipper = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["Clipper"]();
+    this.paths = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["Paths"]();
   }
 
   addPath(path) {
-    
+      let clipper = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["Clipper"]();
+      clipper.AddPaths(this.paths, __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["PolyType"].ptSubject,true);
+      clipper.AddPath(path, __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["PolyType"].ptClip,true);
+      let answer = new __WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["Paths"]();
+      clipper.Execute(__WEBPACK_IMPORTED_MODULE_0__node_modules_js_clipper_clipper__["ClipType"].ctUnion, answer);
+      this.paths = answer;
   }
 
   draw(ctx) {
-
+    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__colors__["a" /* BLUEPRINT */];
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__colors__["b" /* BORDER */];
+    ctx.lineWidth = 5;
+    for(let i=0;i<this.paths.length;i++) {
+      const path = this.paths[i];
+      ctx.beginPath();
+      for(let j=0;j<path.length;j++) {
+        ctx.lineTo(path[j].X, path[j].Y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fill();
+    }
   }
 }
 /* harmony default export */ __webpack_exports__["a"] = (Map);
@@ -7338,6 +7359,19 @@ class Vector {
 }
 
 /* harmony default export */ __webpack_exports__["a"] = (Vector);
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+const BLUEPRINT = "#0e609c";
+/* harmony export (immutable) */ __webpack_exports__["a"] = BLUEPRINT;
+
+const BORDER = "white";
+/* harmony export (immutable) */ __webpack_exports__["b"] = BORDER;
+
 
 
 /***/ })
