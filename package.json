@@ -4,7 +4,8 @@
   "description": "## Timeline ### Day 1 * Camera * User Interface and button clicks * Polygon addition * Polygon Mutation",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack nav_driver.js bundle.js -w"
   },
   "keywords": [],
   "author": "",
