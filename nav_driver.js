@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // Step Flow Events
   document.getElementById("next-1").addEventListener("click", (e) => main.next(1));
   document.getElementById("next-2").addEventListener("click", (e) => main.next(2));
-  document.getElementById("next-3").addEventListener("click", (e) => main.next(3));
+  document.getElementById("next-4").addEventListener("click", (e) => main.next(4));
   document.getElementById("reset").addEventListener("click", (e) => main.next(-1));
 
 
