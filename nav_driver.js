@@ -20,11 +20,18 @@ document.addEventListener("DOMContentLoaded", function() {
   // Control events
   document.getElementById("percentWalls").addEventListener("change", e => main.wallsPercent(e.currentTarget.value));
   document.getElementById("percentWalls").addEventListener("input", e => main.wallsPercent(e.currentTarget.value));
+  document.getElementById("regenAutoma").addEventListener("click", (e) => main.regenAutoma());
+  document.getElementById("clipperPlus").addEventListener("click", (e) => main.polygonClip(true));
+  document.getElementById("clipperMinus").addEventListener("click", (e) => main.polygonClip(false));
+
+
   // Step Flow Events
   document.getElementById("next-1").addEventListener("click", (e) => main.next(1));
   document.getElementById("next-2").addEventListener("click", (e) => main.next(2));
   document.getElementById("next-3").addEventListener("click", (e) => main.next(3));
   document.getElementById("reset").addEventListener("click", (e) => main.next(-1));
+
+
 
   // Mouse sensory events
   window.addEventListener("keydown", (e) => main.keyDown(e.keyCode), true);
