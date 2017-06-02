@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener("keydown", (e) => main.keyDown(e.keyCode), true);
   window.addEventListener("keyup", (e) => main.keyUp(e.keyCode), true);
   window.addEventListener("mousemove", main.mousemove.bind(main));
-  window.addEventListener("mousedown", main.mousedown.bind(main));
+  canvasEl.addEventListener("mousedown", main.mousedown.bind(main));
   window.addEventListener("mouseup", main.mouseup.bind(main));
   window.addEventListener("mousewheel", main.mousewheel.bind(main));
   window.addEventListener("DOMMouseScroll", main.mousewheel.bind(main));
