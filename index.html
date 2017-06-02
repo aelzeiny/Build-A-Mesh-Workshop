@@ -4,9 +4,50 @@
     <meta charset="utf-8">
     <title>Navigation Mesh</title>
     <link rel="stylesheet" href="application.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
     <script type="text/javascript" src="bundle.js"></script>
   </head>
   <body>
-    <canvas></canvas>
+    <div id="controls">
+
+      <div class="step" id="step-1">
+        <h2>STEP 1:</h2>
+        <h3 class="indent">PROCEDURAL LEVEL GENERATION</h3>
+        <label class="indent-2" for="percentWalls">WALLS %:
+          <input id="percentWalls" type="range"/>
+        </label>
+        <br/>
+        <button class="indent-2" id="regenAutoma">regenerate</button>
+        <button class="indent" id="next-1">next</button>
+      </div>
+
+      <div class="step" id="step-2">
+        <h2>STEP 2:</h2>
+        <h3 class="indent">Modify Mesh</h3>
+        <button class="indent-2">+</button>
+        <button class="indent">-</button>
+        <br/>
+        <button class="indent-3" id="next-2">next</button>
+      </div>
+
+      <div class="step" id="step-3">
+        <h2>STEP 3:</h2>
+        <h3 class="indent">Building the Mesh</h3>
+        <button class="indent-2" id="next-3">skip</button>
+      </div>
+
+      <div class="step" id="step-4">
+        <h2>STEP 4:</h2>
+        <h3 class="indent">Drop the player on the map</h3>
+      </div>
+
+      <div class="step" id="step-5">
+        <h2>STEP 5:</h2>
+        <h3 class="indent">Look at him go!</h3>
+        <button class="indent-2" id="reset">reset</button>
+      </div>
+    </div>
+    <canvas>
+    </canvas>
   </body>
 </html>
