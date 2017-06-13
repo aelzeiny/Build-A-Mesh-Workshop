@@ -6,6 +6,7 @@ h1, h2, h3, h4, p {
 
 /* No reason to import bootstrap just for button appeal */
 button {
+  margin-bottom: 20px;
   text-transform: none;
   -ms-touch-action: manipulation;
   touch-action: manipulation;
@@ -98,10 +99,15 @@ h2 {
   border: 1px dashed white;
   height: 100vh;
 }
+#controls p {
+  margin-bottom: 20px;
+}
 .step {
   display: flex;
   flex-direction: column;
   margin: 3px;
   align-items: center;
   text-align: center;
+  width: 230px;
+  position: absolute;
 }
