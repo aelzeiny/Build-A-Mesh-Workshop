@@ -36,10 +36,10 @@ document.addEventListener("DOMContentLoaded", function() {
   // Mouse sensory events
   window.addEventListener("keydown", (e) => main.keyDown(e.keyCode), true);
   window.addEventListener("keyup", (e) => main.keyUp(e.keyCode), true);
-  window.addEventListener("mousemove", main.mousemove.bind(main));
+  canvasEl.addEventListener("mousemove", main.mousemove.bind(main));
   canvasEl.addEventListener("mousedown", main.mousedown.bind(main));
-  window.addEventListener("mouseup", main.mouseup.bind(main));
-  window.addEventListener("mousewheel", main.mousewheel.bind(main));
+  canvasEl.addEventListener("mouseup", main.mouseup.bind(main));
+  canvasEl.addEventListener("mousewheel", main.mousewheel.bind(main));
   window.addEventListener("DOMMouseScroll", main.mousewheel.bind(main));
   window.addEventListener("resize", main.setSize.bind(main));
   main.start();
