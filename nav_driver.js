@@ -3,9 +3,11 @@ import Main from './lib/main';
 /**** DOCUMENT *****/
 document.addEventListener("DOMContentLoaded", function() {
   const canvasEl = document.getElementsByTagName("canvas")[0];
+  const controls = document.getElementById("controls");
   const resize = () => {
-    canvasEl.width = window.innerWidth - 30;
+    canvasEl.width = window.innerWidth - 280;
     canvasEl.height = window.innerHeight - 30;
+    controls.setAttribute("style", `height: ${window.innerHeight - 28}px`);
   };
   resize();
   window.addEventListener("resize", resize);
