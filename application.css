@@ -67,6 +67,7 @@ article {
 canvas {
   background-color: #0e609c;
   border: 1px white dashed;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 
 h2 {
@@ -96,9 +97,10 @@ h2 {
   padding: 5px;
   box-sizing: border-box;
   width: 250px;
-  border: 1px dashed white;
+  /*border: 1px dashed white;*/
   height: 100vh;
 }
+
 #controls p {
   margin-bottom: 20px;
 }
@@ -110,4 +112,15 @@ h2 {
   text-align: center;
   width: 230px;
   position: absolute;
+  /*visibility: hidden;*/
+  top: -500px;
+  -webkit-transition: all 1s; /* Safari */
+  transition: all 1s;
+  opacity: 0;
+}
+
+.step.active {
+  /*visibility: visible;*/
+  top: 0;
+  opacity: 1;
 }
