@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server -w --inline"
+    "start": "webpack-dev-server -w --inline",
+    "build": "webpack nav_driver.js bundle.js"
   },
   "keywords": [],
   "author": "",
