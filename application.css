@@ -114,8 +114,8 @@ h2 {
   position: absolute;
   /*visibility: hidden;*/
   top: -500px;
-  -webkit-transition: all 1s; /* Safari */
-  transition: all 1s;
+  -webkit-transition: all .75s; /* Safari */
+  transition: all .75s;
   opacity: 0;
 }
 
