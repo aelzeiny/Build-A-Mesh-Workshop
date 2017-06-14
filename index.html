@@ -57,17 +57,38 @@
       <div class="step" id="step-3">
         <h2>STEP 3:</h2>
         <h3>Drop the player on the map</h3>
+        <p>
+          Now that you've built a map, we have to configure the mesh for pathfinding.
+          You migh think that every polygon vertex would be a pathfinding node,
+          but we can optimize the number of nodes by only considering vertecies that
+          are concave (innies) rather than convex (outties). 
+        </p>
+        <p>
+          Click on the area in which the player will walk around in.
+          This demonstration works best if you pick the biggest polygon
+        </p>
       </div>
 
       <div class="step" id="step-4">
         <h2>STEP 4:</h2>
         <h3>Building the Mesh</h3>
+        <p>
+          Sit back and relax
+        </p>
         <button id="next-4">continue</button>
       </div>
 
       <div class="step" id="step-5">
         <h2>STEP 5:</h2>
-        <h3>Look at him go!</h3>
+        <h3>A Fully Connected Graph</h3>
+        <p>
+          Using a line of site algorithm, every node to every one of its neighbors.
+          Move your mouse around every nook and cranny, and you'll notice that
+          there are no blind spots in the mesh.
+        </p>
+        <p>
+          This means that you can get from any starting location to any ending location.
+        </p>
         <button id="reset">reset</button>
       </div>
     </div>
