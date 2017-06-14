@@ -89,6 +89,10 @@ h2 {
 
 
 /**** SPECIFIC POSITIONING ****/
+#wek {
+  visibility: hidden;
+  position: absolute;
+}
 #controls {
   position: absolute;
   top: 0;
@@ -97,7 +101,6 @@ h2 {
   padding: 5px;
   box-sizing: border-box;
   width: 250px;
-  /*border: 1px dashed white;*/
   height: 100vh;
 }
 
@@ -112,15 +115,13 @@ h2 {
   text-align: center;
   width: 230px;
   position: absolute;
-  /*visibility: hidden;*/
   top: -500px;
-  -webkit-transition: all .75s; /* Safari */
+  -webkit-transition: all .75s;
   transition: all .75s;
   opacity: 0;
 }
 
 .step.active {
-  /*visibility: visible;*/
   top: 0;
   opacity: 1;
 }
