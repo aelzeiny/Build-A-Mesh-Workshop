@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function() {
   resize();
   window.addEventListener("resize", resize);
 
-  const views = new Array(5);
+  const views = new Array(6);
   for(let i=1;i<=views.length;i++) {
     views[i-1] = document.getElementById("step-" + i);
   }
@@ -31,7 +31,8 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("next-1").addEventListener("click", (e) => main.next(1));
   document.getElementById("next-2").addEventListener("click", (e) => main.next(2));
   document.getElementById("next-4").addEventListener("click", (e) => main.next(4));
-  document.getElementById("reset").addEventListener("click", (e) => main.next(-1));
+  document.getElementById("next-5").addEventListener("click", (e) => main.next(5));
+  // document.getElementById("reset").addEventListener("click", (e) => main.next(-1));
 
 
 
