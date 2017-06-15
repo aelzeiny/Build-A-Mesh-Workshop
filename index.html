@@ -10,20 +10,37 @@
   </head>
   <body>
     <div id="controls">
-
       <div class="step" id="step-1">
-        <h2>STEP 1:</h2>
-        <h3>PROCEDURAL LEVEL GENERATION</h3>
-        <label for="percentWalls">WALLS %:
-          <input id="percentWalls" type="range"/>
-        </label>
-        <br/>
-        <button id="regenAutoma">regenerate</button>
+        <h2>Build-a-mesh Workshop</h2>
+        <h3>Pathfinding on abstract polygons</h3>
 
         <p>
           Here we will be showcasing a series of common level generation
           techniques used by major gaming studios!
         </p>
+        <p>
+          Implementing pathfinding on grid-based maps is a fairly basic task.
+          However, real-world spaces are hardly ever so orthogonal or straight-forward.
+        </p>
+        <p>
+          Implementing pathfinding on concave (abstract) polygons is a much more difficult
+          task. This project will hopefully demystify some common practices that developers
+          use in the industry.
+        </p>
+        <p>
+          Sound complicated? Don't worry. In the end you'll be rewarded with penguin.
+        </p>
+
+        <button id="next-0">start</button>
+      </div>
+      <div class="step" id="step-1">
+        <h2>STEP 1:</h2>
+        <h3>Procedural Level Generation</h3>
+        <label for="percentWalls">WALLS %:
+          <input id="percentWalls" type="range"/>
+        </label>
+        <br/>
+        <button id="regenAutoma">regenerate</button>
         <p>
           The depicted algorithm is the Cellular-Automa Method of Procedural Level Generation <br/>
         </p>

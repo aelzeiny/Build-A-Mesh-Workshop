@@ -8390,7 +8390,7 @@ class AutomaToClipperConverter {
 
 
 
-const OFFSET = 2;
+const OFFSET = 3;
 class ClipperOffsetMap {
   constructor(boundary, holes, originalClipper) {
     // move line of sigh t
@@ -8977,6 +8977,7 @@ class Wek {
       if(delta.distanceSq() < EPSILON * EPSILON) {
         if(this.path.length !== 1)
           this.pos = this.destination;
+        this.velo.x = this.velo.y = 0;
         this.destination = (this.path.length > 0) ? this.path.pop() : undefined;
       }
     }
@@ -9016,6 +9017,10 @@ class WekDriver {
     this.paths = paths;
     this.holesI = holesI;
     this.wek = new __WEBPACK_IMPORTED_MODULE_0__wek__["a" /* default */](this.navigator.startPoint);
+    this.footprintImg = document.getElementById("footprints");
+    this.footprints = new Array(50);
+    this.footprintsI = 0;
+    window.setInterval(this._footprint.bind(this), 200);
   }
 
   update(delta) {
@@ -9033,8 +9038,21 @@ class WekDriver {
     });
   }
 
+  _footprint() {
+    if (this.wek.velo.distanceSq() > 0) {
+      this.footprints[this.footprintsI] = {
+        pos: this.wek.pos,
+        rot: this.wek.rotation
+      };
+      this.footprintsI = (this.footprintsI + 1) % this.footprints.length;
+      console.log(this.footprints);
+    }
+  }
+
   draw(ctx) {
     this._drawMap(ctx);
+    this._drawFootprints(ctx);
+    this._drawHoles(ctx);
     this._drawPath(ctx);
     this.wek.draw(ctx);
   }
@@ -9052,6 +9070,21 @@ class WekDriver {
     }
   }
 
+  _drawFootprints(ctx) {
+    let width = 15;
+    const adjHeight = width / this.footprintImg.width * this.footprintImg.height;
+    for(let i=0;i<this.footprints.length;i++) {
+      const foot = this.footprints[i];
+      if(!foot)
+        break;
+      ctx.save();
+      ctx.translate(foot.pos.x, foot.pos.y);
+      ctx.rotate(foot.rot);
+      ctx.drawImage(this.footprintImg, - width/2, - adjHeight/2, width, adjHeight);
+      ctx.restore();
+    }
+  }
+
   _drawMap(ctx) {
     ctx.save();
     ctx.lineWidth = 2;
@@ -9059,13 +9092,33 @@ class WekDriver {
       const path = this.paths[i];
       ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["c" /* WEK_FORGROUND */];
       if(this.holesI[i])
-        ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["d" /* BLUEPRINT */];
-      else {
-        ctx.shadowColor = 'cornflowerblue';
-        ctx.shadowBlur = 5;
-        ctx.shadowOffsetX = 5;
-        ctx.shadowOffsetY = 5;
+        continue;
+      ctx.shadowColor = 'cornflowerblue';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 5;
+      ctx.shadowOffsetY = 5;
+      ctx.beginPath();
+      for(let j=0;j<path.length;j++) {
+        ctx.lineTo(path[j].X, path[j].Y);
       }
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  _drawHoles(ctx) {
+
+    ctx.save();
+    for(let i=0;i<this.paths.length;i++) {
+      const path = this.paths[i];
+      ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["d" /* BLUEPRINT */];
+      if(!this.holesI[i])
+        continue;
+      ctx.shadowColor = 'cornflowerblue';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 5;
+      ctx.shadowOffsetY = 5;
       ctx.beginPath();
       for(let j=0;j<path.length;j++) {
         ctx.lineTo(path[j].X, path[j].Y);
