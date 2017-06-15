@@ -11,8 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
   };
   resize();
   window.addEventListener("resize", resize);
-
-  const views = new Array(6);
+  const views = new Array(7);
   for(let i=0;i<=views.length;i++) {
     views[i] = document.getElementById("step-" + i);
   }
