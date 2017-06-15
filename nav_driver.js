@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function() {
   resize();
   window.addEventListener("resize", resize);
   const views = new Array(7);
-  for(let i=0;i<=views.length;i++) {
+  for(let i=0;i<7;i++) {
     views[i] = document.getElementById("step-" + i);
   }
 
@@ -33,8 +33,6 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("next-4").addEventListener("click", (e) => main.next(4));
   document.getElementById("next-5").addEventListener("click", (e) => main.next(5));
   // document.getElementById("reset").addEventListener("click", (e) => main.next(-1));
-
-
 
   // Mouse sensory events
   window.addEventListener("keydown", (e) => main.keyDown(e.keyCode), true);
