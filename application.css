@@ -125,3 +125,16 @@ h2 {
   top: 0;
   opacity: 1;
 }
+
+/******** LINKS *********/
+#links a {
+    color: white;
+}
+
+div#links {
+    text-align: center;
+    bottom: 20px;
+    position: absolute;
+    left: 110px;
+    color: white;
+}
