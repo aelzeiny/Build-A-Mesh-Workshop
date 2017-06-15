@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 18);
+/******/ 	return __webpack_require__(__webpack_require__.s = 19);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -7167,6 +7167,156 @@ module.exports = ClipperLib;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_js_clipper__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_colors__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_vector__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__clipper_offset_map__ = __webpack_require__(14);
+
+
+
+
+
+
+class ClipperMap {
+  constructor(paths = null) {
+    this.clipper = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Clipper"]();
+    this.paths = paths || new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Paths"]();
+    this.holesI = {};
+    this.isUnion = true;
+    this._checkHoles();
+  }
+
+  selectPrimaryMesh(pt) {
+    pt = {
+      X: pt.x,
+      Y: pt.y
+    };
+    this.startPoint = pt;
+    let biggestTargetIdx = null;
+    let maxArea = 0;
+    for(let i=0;i<this.paths.length;i++) {
+      if(!this.holesI[i] && __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["b" /* contains */](this.paths[i], pt)) {
+        const area = __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["c" /* area */](this.paths[i]);
+        if(area > maxArea) {
+          maxArea = area;
+          biggestTargetIdx = i;
+        }
+      }
+    }
+    if(biggestTargetIdx !== null)
+      return this._createOffsets(biggestTargetIdx);
+    return null;
+  }
+
+  selectPrimaryBiggest() {
+    let maxArea = -1;
+    let biggestTargetIdx = null;
+    for(let i=0;i<this.paths.length;i++) {
+      if(!this.holesI[i]) {
+        const area = __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["c" /* area */](this.paths[i]);
+        if(area > maxArea) {
+          maxArea = area;
+          biggestTargetIdx = i;
+        }
+      }
+    }
+    const offsetMap = this._createOffsets(biggestTargetIdx);
+    this.startPoint = offsetMap.getAnyPoint();
+    return offsetMap;
+  }
+
+  inLineOfSight(a, b) {
+    let isCrossing;
+    for(let i=0;i<this.paths.length;i++) {
+      const poly = this.paths[i];
+      for(let j=0;j<poly.length;j++) {
+        isCrossing = __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["d" /* lineSegmentsCross */](a, b,
+          poly[j], poly[j + 1 === poly.length ? 0 : j + 1]);
+        if(isCrossing) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  addPath(path) {
+    let clipper = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Clipper"]();
+    clipper.AddPaths(this.paths, __WEBPACK_IMPORTED_MODULE_0_js_clipper__["PolyType"].ptSubject,true);
+    clipper.AddPath(path, __WEBPACK_IMPORTED_MODULE_0_js_clipper__["PolyType"].ptClip,true);
+    let answer = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Paths"]();
+    const mode = this.isUnion ? __WEBPACK_IMPORTED_MODULE_0_js_clipper__["ClipType"].ctUnion :
+      __WEBPACK_IMPORTED_MODULE_0_js_clipper__["ClipType"].ctDifference;
+    clipper.Execute(mode, answer);
+    this.paths = answer;
+    this._checkHoles();
+  }
+
+  _createOffsets(targetIdx) {
+    const relevantHoles = [];
+    const allHoles = Object.keys(this.holesI);
+    for(let i=0; i<allHoles.length; i++) {
+      const h = allHoles[i];
+      const curr = this.holesI[h];
+      if(this.holesI[h] === targetIdx.toString()){
+        relevantHoles.push(this.paths[h]);
+      }
+    }
+    return new __WEBPACK_IMPORTED_MODULE_4__clipper_offset_map__["a" /* default */](this.paths[targetIdx], relevantHoles, this);
+  }
+
+  _checkHoles() {
+    this.holesI = {};
+    for(let i=0; i<this.paths.length; i++) {
+      const outterPoly = this.paths[i];
+      for(let j=0;j<this.paths.length;j++) {
+        if(i === j)
+          continue;
+        const innerPoly = this.paths[j];
+        if(this._isHole(outterPoly, innerPoly))
+          this.holesI[j] = i.toString();
+      }
+    }
+  }
+
+  /// return false if one point is not contained within the polygon
+  /// otherwise, return true
+  _isHole(outterPoly, innerPoly) {
+    for(let ptI = 0; ptI < innerPoly.length; ptI++) {
+      if(!__WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["b" /* contains */](outterPoly, innerPoly[ptI]))
+        return false;
+    }
+    return true;
+  }
+
+  draw(ctx) {
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["h" /* BORDER */];
+    ctx.lineWidth = 2;
+    for(let i=0;i<this.paths.length;i++) {
+      const path = this.paths[i];
+      ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["d" /* BLUEPRINT */];
+      if(this.holesI[i])
+        ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["i" /* AUTOMA_BORDER */];
+      ctx.beginPath();
+      for(let j=0;j<path.length;j++) {
+        ctx.lineTo(path[j].X, path[j].Y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+}
+/* harmony default export */ __webpack_exports__["a"] = (ClipperMap);
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__vector__ = __webpack_require__(1);
 
 
@@ -7283,144 +7433,11 @@ const contains = function(path, position, toleranceOnOutside = true) {
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_js_clipper__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_colors__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_vector__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__clipper_offset_map__ = __webpack_require__(11);
-
-
-
-
-
-
-class ClipperMap {
-  constructor(paths = null) {
-    this.clipper = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Clipper"]();
-    this.paths = paths || new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Paths"]();
-    this.holesI = {};
-    this.isUnion = true;
-    this._checkHoles();
-  }
-
-  selectPrimaryMesh(pt) {
-    pt = {
-      X: pt.x,
-      Y: pt.y
-    };
-    this.startPoint = pt;
-    let biggestTargetIdx = null;
-    let maxArea = 0;
-    for(let i=0;i<this.paths.length;i++) {
-      if(!this.holesI[i] && __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["b" /* contains */](this.paths[i], pt)) {
-        const area = __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["c" /* area */](this.paths[i]);
-        if(area > maxArea) {
-          maxArea = area;
-          biggestTargetIdx = i;
-        }
-      }
-    }
-    if(biggestTargetIdx !== null)
-      return this._createOffsets(biggestTargetIdx);
-    return null;
-  }
-
-  inLineOfSight(a, b) {
-    let isCrossing;
-    for(let i=0;i<this.paths.length;i++) {
-      const poly = this.paths[i];
-      for(let j=0;j<poly.length;j++) {
-        isCrossing = __WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["d" /* lineSegmentsCross */](a, b,
-          poly[j], poly[j + 1 === poly.length ? 0 : j + 1]);
-        if(isCrossing) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  addPath(path) {
-    let clipper = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Clipper"]();
-    clipper.AddPaths(this.paths, __WEBPACK_IMPORTED_MODULE_0_js_clipper__["PolyType"].ptSubject,true);
-    clipper.AddPath(path, __WEBPACK_IMPORTED_MODULE_0_js_clipper__["PolyType"].ptClip,true);
-    let answer = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Paths"]();
-    const mode = this.isUnion ? __WEBPACK_IMPORTED_MODULE_0_js_clipper__["ClipType"].ctUnion :
-      __WEBPACK_IMPORTED_MODULE_0_js_clipper__["ClipType"].ctDifference;
-    clipper.Execute(mode, answer);
-    this.paths = answer;
-    this._checkHoles();
-  }
-
-  _createOffsets(targetIdx) {
-    const relevantHoles = [];
-    const allHoles = Object.keys(this.holesI);
-    for(let i=0; i<allHoles.length; i++) {
-      const h = allHoles[i];
-      const curr = this.holesI[h];
-      if(this.holesI[h] === targetIdx.toString()){
-        relevantHoles.push(this.paths[h]);
-      }
-    }
-    return new __WEBPACK_IMPORTED_MODULE_4__clipper_offset_map__["a" /* default */](this.paths[targetIdx], relevantHoles, this);
-  }
-
-  _checkHoles() {
-    this.holesI = {};
-    for(let i=0; i<this.paths.length; i++) {
-      const outterPoly = this.paths[i];
-      for(let j=0;j<this.paths.length;j++) {
-        if(i === j)
-          continue;
-        const innerPoly = this.paths[j];
-        if(this._isHole(outterPoly, innerPoly))
-          this.holesI[j] = i.toString();
-      }
-    }
-  }
-
-  /// return false if one point is not contained within the polygon
-  /// otherwise, return true
-  _isHole(outterPoly, innerPoly) {
-    for(let ptI = 0; ptI < innerPoly.length; ptI++) {
-      if(!__WEBPACK_IMPORTED_MODULE_2__utils_mesh_guru__["b" /* contains */](outterPoly, innerPoly[ptI]))
-        return false;
-    }
-    return true;
-  }
-
-  draw(ctx) {
-    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["h" /* BORDER */];
-    ctx.lineWidth = 2;
-    for(let i=0;i<this.paths.length;i++) {
-      const path = this.paths[i];
-      ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["d" /* BLUEPRINT */];
-      if(this.holesI[i])
-        ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["i" /* AUTOMA_BORDER */];
-      ctx.beginPath();
-      for(let j=0;j<path.length;j++) {
-        ctx.lineTo(path[j].X, path[j].Y);
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-  }
-}
-/* harmony default export */ __webpack_exports__["a"] = (ClipperMap);
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_priority_queue__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_priority_queue__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_js_priority_queue__);
 
 class NavMesh {
@@ -7581,15 +7598,705 @@ class NavNode {
 
 /***/ }),
 /* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_colors__ = __webpack_require__(0);
+
+class AutomaMap {
+  constructor(mapWidth, mapHeight, grid, percentWalls = 50) {
+		this.MapWidth = mapWidth;
+		this.MapHeight = mapHeight;
+		this.PercentAreWalls = percentWalls;
+
+    this.grid = grid;
+	}
+
+  MakeCaverns() {
+		for(let row=0; row <= this.MapHeight-1; row++)
+			for(let column = 0; column <= this.MapWidth-1; column++)
+				this.Map[column][row] = this.PlaceWallLogic(column,row);
+	}
+
+	PlaceWallLogic(x, y) {
+		let numWalls = this.GetAdjacentWalls(x,y,1,1);
+		if(this.Map[x][y] === 1) {
+			if( numWalls >= 4 )
+				return 1;
+			if(numWalls < 2)
+				return 0;
+		}
+		else {
+			if(numWalls >= 5)
+				return 1;
+		}
+		return 0;
+	}
+
+  GetAdjacentWalls(x, y, scopeX = 1, scopeY = 1) {
+		let startX = x - scopeX;
+		let startY = y - scopeY;
+		let endX = x + scopeX;
+		let endY = y + scopeY;
+
+		let iX = startX;
+		let iY = startY;
+
+		let wallCounter = 0;
+
+		for(iY = startY; iY <= endY; iY++) {
+			for(iX = startX; iX <= endX; iX++) {
+ 				if(!(iX === x && iY === y)) {
+					if(this.IsWall(iX,iY))
+						wallCounter += 1;
+				}
+			}
+		}
+		return wallCounter;
+	}
+
+  IsWall(x, y) {
+		// Consider out-of-bound a wall
+		if(this.IsOutOfBounds(x,y))
+			return true;
+
+		if(this.Map[x][y] === 1)
+			return true;
+
+		if(this.Map[x][y] === 0)
+			return false;
+
+		return false;
+	}
+
+  IsOutOfBounds(x, y) {
+		if(x<0 || y<0)
+			return true;
+		if(x > this.MapWidth-1 || y > this.MapHeight-1 )
+			return true;
+		return false;
+	}
+
+  RandomFillMap() {
+		// New, empty map
+    this.Map = new Array(this.MapWidth);
+    for(let q=0;q<this.Map.length;q++) {
+      let def = new Array(this.MapHeight);
+      def.fill(0);
+      this.Map[q] = def;
+    }
+
+		let mapMiddle = 0; // Temp variable
+		for(let row=0; row < this.MapHeight; row++) {
+			for(let column = 0; column < this.MapWidth; column++)
+			{
+				// If coordinants lie on the the edge of the map (creates a border)
+				if(column === 0)
+					this.Map[column][row] = 1;
+				else if (row === 0)
+					this.Map[column][row] = 1;
+				else if (column === this.MapWidth-1)
+					this.Map[column][row] = 1;
+				else if (row === this.MapHeight-1)
+					this.Map[column][row] = 1;
+				// Else, fill with a wall a random percent of the time
+				else
+				{
+					mapMiddle = (this.MapHeight / 2);
+
+					if(row === mapMiddle)
+						this.Map[column][row] = 0;
+					else
+						this.Map[column][row] = this.RandomPercent(this.PercentAreWalls);
+				}
+			}
+		}
+	}
+
+  RandomPercent(percent) {
+		if(percent >= Math.random() * 100 + 1)
+			return 1;
+		return 0;
+	}
+
+  setSize(width, height) {
+    this.MapHeight = Math.floor(width / this.grid);
+    this.MapWidth = Math.floor(height / this.grid);
+  }
+
+  draw(ctx) {
+    if(!this.Map)
+      return;
+
+    ctx.beginPath();
+    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_0__utils_colors__["i" /* AUTOMA_BORDER */];
+    for(let i=0;i< this.Map.length;i++) {
+      for(let j=0;j<this.Map[i].length;j++) {
+        if(this.Map[i][j] !== 0){
+          ctx.rect(j*this.grid, i*this.grid, this.grid, this.grid);
+        }
+      }
+    }
+    ctx.fill();
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (AutomaMap);
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__clipper_map__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_concaveman__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_concaveman___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_concaveman__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_js_clipper__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_js_clipper__);
+
+
+
+
+
+class AutomaToClipperConverter {
+  constructor(automa, grid) {
+    this.automa = automa.Map;
+    this.grid = grid;
+    this.edges = {};
+    // find all points on edges. O(n^2)
+    for(let i=0;i<this.automa.length;i++) {
+      for(let j=0;j<this.automa[i].length;j++) {
+        const neighs = this._getNeighbors(i, j);
+        if(this.automa[i][j] && this._isOnEdgeCardinally(i,j))
+          this.edges[this._hash(i, j)] = [i,j];
+      }
+    }
+
+    this._seperatePolys();
+
+    this._concaveman();
+  }
+
+  generateClipper() {
+    const clipperPolys = new Array(this.seperatedPolys.length);
+    for(let i=0; i<this.seperatedPolys.length; i++) {
+      clipperPolys[i] = this.seperatedPolys[i].map((pt) => {
+          return new __WEBPACK_IMPORTED_MODULE_2_js_clipper__["IntPoint"] (
+            pt[1], pt[0]
+          );
+       });
+    }
+    return new __WEBPACK_IMPORTED_MODULE_0__clipper_map__["a" /* default */](clipperPolys);
+  }
+
+  _concaveman() {
+    for(let i=0;i<this.seperatedPolys.length;i++) {
+      // let expandedPoly = this.seperatedPolys[i].map(el => [el[0] * (1/100000), el[1] * (1/100000)]);
+      this.seperatedPolys[i] = __WEBPACK_IMPORTED_MODULE_1_concaveman___default()(this.seperatedPolys[i], .5, 0);
+      // this.seperatedPolys[i] = expandedPoly.map(el => [el[0] / (1/100000), el[1] /(1/100000)]);
+    }
+  }
+
+  _seperatePolys() {
+    this.touchedPoints = {};
+    this.seperatedPolys = [];
+    const edges = Object.values(this.edges);
+    for(let i=0;i<edges.length;i++) {
+      this.streak = [];
+      this._touch(edges[i]);
+      if(this.streak.length >= 3)
+        this.seperatedPolys.push(this.streak);
+    }
+    // cleanup
+    this.touchedPoints = undefined;
+    this.streak = undefined;
+  }
+
+  _touch(edge) {
+    const hashMe = this._hash(edge[0], edge[1]);
+    // if point is already visited - visit no more
+    if(this.touchedPoints[hashMe])
+      return;
+    this.touchedPoints[hashMe] = edge;
+    // if point is edge but point is not yet touched
+    if(this.edges[hashMe]) {
+      const displayEdge = [
+        edge[0]*this.grid + this.grid,
+        edge[1]*this.grid + this.grid
+      ];
+      this.streak.push(displayEdge);
+      const neighs = this._getNeighbors(edge[0], edge[1]);
+      for(let i=0;i<neighs.length;i++)
+        this._touch(neighs[i]);
+    }
+  }
+
+
+  // 15,485,867 will suffice as a prime number here
+  _hash(r,c) {
+    return (15485867 + r) * 15485867 + c;
+  }
+
+  _isOnEdgeDiagonally(x,y) {
+    for(let i=x-1;i<=x+1;i++) {
+      for(let j=y-1;j<=y+1;j++) {
+        if((i===x && j===y) || i < 0 || j < 0
+          || i >= this.automa.length || j >= this.automa[i].length)
+            continue;
+        if(!this.automa[i][j])
+          return true;
+      }
+    }
+    return false;
+  }
+
+  _isOnEdgeCardinally(r,c) {
+    const a = this.automa;
+    if(this._rowInBounds(r-1) && !this.automa[r-1][c])
+      return true;
+    if(this._rowInBounds(r+1) && !this.automa[r+1][c])
+      return true;
+    if(this._colInBounds(c-1) && !this.automa[r][c-1])
+      return true;
+    if(this._colInBounds(c+1) && !this.automa[r][c+1])
+      return true;
+    return false;
+  }
+
+  _rowInBounds(r) {
+    return r >= 0 && r < this.automa.length;
+  }
+
+  _colInBounds(c) {
+    return c >= 0 && c < this.automa[0].length;
+  }
+
+  _getNeighbors(x,y) {
+    const answer = [];
+    for(let i=x-1;i<=x+1;i++) {
+      for(let j=y-1;j<=y+1;j++) {
+        if((i===x && j===y) || i < 0 || j < 0
+          || i >= this.automa.length || j >= this.automa[i].length)
+            continue;
+        if(this.automa[i][j])
+          answer.push([i,j]);
+      }
+    }
+    return answer;
+  }
+
+  // Draw the converter as a game object only for debugging purposes
+  draw(ctx) {
+    // const edges = Object.values(this.edges);
+    // for(let i=0;i<edges.length;i++){
+    //   ctx.beginPath();
+    //   const r = edges[i][0];
+    //   const c = edges[i][1];
+    //   ctx.rect(c*this.grid, r*this.grid, this.grid, this.grid);
+    //   ctx.fillStyle = "red";
+    //   ctx.fill();
+    // }
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (AutomaToClipperConverter);
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_js_clipper__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_mesh_guru__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_colors__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_nav_mesh__ = __webpack_require__(5);
+
+
+
+
+const TICK = 20;
+const TICK_AFTER = 20;
+class NavMeshAnimator {
+  constructor(clipperMap, doneFunction) {
+    this.clipperMap = clipperMap;
+    this.doneFunction = doneFunction;
+    this.allVerts = [];
+    this.allConnects = [];
+    this.bounds = clipperMap.bounds;
+    this._generateNodes();
+    this._connectNodes();
+
+    // Visual timer stuff
+    this.tickCountdown = TICK;
+    this.tickAfter = 0;
+    this.visibleVerts = [];
+    this.visibleConnections = [];
+  }
+
+  _connectNodes() {
+    for(let i=0;i<this.allVerts.length;i++) {
+      for(let j=0;j<this.allVerts.length;j++) {
+        if(i === j || !this.allVerts[i].isNode || !this.allVerts[j].isNode)
+          continue;
+        const inSight = this.clipperMap.inLineOfSight(this.allVerts[i].value, this.allVerts[j].value);
+        if(inSight)
+          this.allConnects.push([i,j]);
+      }
+    }
+  }
+
+  _generateNodes() {
+    const clipperMap = this.clipperMap;
+    for(let i=0;i<clipperMap.paths.length;i++) {
+      const poly = clipperMap.paths[i];
+      for(let j=0;j<poly.length;j++) {
+        this.allVerts.push({
+          value: poly[j],
+          // javascript XOR on booleans is a bit strange...
+          isNode: __WEBPACK_IMPORTED_MODULE_1__utils_mesh_guru__["a" /* isVertexConcave */](poly, j)
+        });
+      }
+    }
+  }
+
+  update(delta) {
+    this.tickCountdown -= delta;
+    if(this.tickCountdown < 0) {
+      this._update();
+      this.tickCountdown = TICK;
+    }
+  }
+
+  _update() {
+    if(this.visibleVerts.length < this.allVerts.length) {
+      this.visibleVerts.push(
+        this.allVerts[this.visibleVerts.length]
+      );
+    }
+    else if(this.visibleConnections.length < this.allConnects.length) {
+      const toPush = [];
+      for(let i=this.visibleConnections.length;i < this.allConnects.length;i++ ){
+        if(toPush.length === 0)
+          toPush.push(this.allConnects[i]);
+        else {
+          if(toPush[toPush.length-1][0] !== this.allConnects[i][0])
+            break;
+          toPush.push(this.allConnects[i]);
+        }
+      }
+      this.visibleConnections = this.visibleConnections.concat(toPush);
+    } else {
+      if(this.tickAfter > TICK_AFTER)
+        this.doneFunction();
+      this.tickAfter ++;
+    }
+  }
+
+  draw(ctx) {
+    for(let i=0;i<this.visibleVerts.length;i++) {
+      const v = this.visibleVerts[i];
+      ctx.fillStyle = v.isNode ? __WEBPACK_IMPORTED_MODULE_2__utils_colors__["f" /* NODE_CORRECT */] : __WEBPACK_IMPORTED_MODULE_2__utils_colors__["g" /* NODE_INCORRECT */];
+      ctx.beginPath();
+      ctx.arc(v.value.X, v.value.Y, 4, 0, 2 * Math.PI, false);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    ctx.beginPath();
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_2__utils_colors__["b" /* NODE_CONNECTION */];
+    ctx.lineWidth = .4;
+    for(let i=0;i<this.visibleConnections.length;i++) {
+      const from = this.allVerts[this.visibleConnections[i][0]].value;
+      const to = this.allVerts[this.visibleConnections[i][1]].value;
+      ctx.moveTo(from.X, from.Y);
+      ctx.lineTo(to.X, to.Y);
+    }
+    ctx.stroke();
+  }
+
+  generateMesh() {
+    const verts = [];
+    // get all verts
+    for(let i=0;i<this.allVerts.length;i++) {
+      const curr = this.allVerts[i];
+      if(curr.isNode)
+        verts.push(curr.value);
+    }
+    return new __WEBPACK_IMPORTED_MODULE_3__utils_nav_mesh__["a" /* default */](verts, this.allConnects.map(c => {
+      return [this.allVerts[c[0]].value, this.allVerts[c[1]].value];
+    }));
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (NavMeshAnimator);
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_colors__ = __webpack_require__(0);
+
+
+const EPSILON = 5;
+class Navigator {
+  constructor(mesh, clipperMap, startPoint) {
+    this.clipperMap = clipperMap;
+    this.mesh = mesh;
+    this._reconnectStartNode(startPoint);
+    this.startPoint = startPoint;
+  }
+
+  setStartPoint(pt) {
+    this._reconnectStartNode(pt);
+  }
+
+  promiseShortestPath(endPoint) {
+    return this._reconnectEndNode(endPoint);
+  }
+
+  mousemove(pt) {
+    pt = this._convertPoint(pt);
+    this._reconnectEndNode(pt);
+  }
+
+  _reconnectStartNode(pt) {
+    if(this.clipperMap.contains(pt)) {
+      if(this.start)
+        this.mesh.removeNode(this.start);
+      //add node
+      this.start = this.mesh.addNode(pt);
+      this._connectTempNode(this.start);
+    }
+  }
+
+  _reconnectEndNode(pt) {
+    if(this.clipperMap.contains(pt)) {
+      const promise = new Promise((resolver) => {
+        if(this.goal)
+          this.mesh.removeNode(this.goal);
+        //add node
+        this.goal = this.mesh.addNode(pt);
+        this._connectTempNode(this.goal);
+        resolver(this.mesh.aStar(this.start, this.goal));
+      });
+      promise.then(data => {this.path = data;});
+      return promise;
+    }
+    return undefined;
+  }
+
+  _connectTempNode(node) {
+    // connect node to entire map
+    const cm = this.clipperMap;
+    const verts = this.mesh.getVerts();
+    for(let i=0;i<verts.length;i++) {
+      if(cm.inLineOfSight(verts[i].value, node.value)) {
+        this.mesh.connectNodes(verts[i], node);
+      }
+    }
+    if(this.start && this.goal) {
+      if(cm.inLineOfSight(this.start.value, this.goal.value)) {
+        this.mesh.connectNodes(this.start, this.goal);
+      }
+      else
+        this.mesh.disconnectNodes(this.start, this.goal);
+    }
+  }
+
+  _convertPoint(pt) {
+    return {X: pt.x, Y: pt.y};
+  }
+
+  update(delta) {
+
+  }
+
+  draw(ctx) {
+    const verts = this.mesh.getVerts();
+    ctx.beginPath();
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_0__utils_colors__["b" /* NODE_CONNECTION */];
+    ctx.lineWidth = .4;
+    for(let i=0;i<verts.length;i++) {
+      const from = verts[i];
+      for(let j=0;j<from.neighbors.length;j++) {
+        ctx.moveTo(from.value.X, from.value.Y);
+        ctx.lineTo(from.neighbors[j].value.X, from.neighbors[j].value.Y);
+      }
+    }
+    ctx.stroke();
+
+    for(let i=0;i<verts.length;i++) {
+      const v = verts[i];
+      ctx.beginPath();
+      ctx.arc(v.value.X, v.value.Y, 4, 0, 2 * Math.PI, false);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    if(this.path && this.path.length > 0) {
+      ctx.beginPath();
+      ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_0__utils_colors__["e" /* PATH */];
+      ctx.lineWidth = 4;
+      ctx.moveTo(this.path[0].X, this.path[0].Y);
+      for(let i=1;i<this.path.length;i++) {
+        ctx.lineTo(this.path[i].X, this.path[i].Y);
+      }
+      ctx.stroke();
+    }
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (Navigator);
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__wek__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_colors__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_vector__ = __webpack_require__(1);
+
+
+
+
+class WekDriver {
+  constructor(navigator, paths, holesI) {
+    this.navigator = navigator;
+    this.paths = paths;
+    this.holesI = holesI;
+    this.wek = new __WEBPACK_IMPORTED_MODULE_0__wek__["a" /* default */](this.navigator.startPoint);
+    this.footprintImg = document.getElementById("footprints");
+    this.footprints = new Array(50);
+    this.footprintsI = 0;
+    window.setInterval(this._footprint.bind(this), 200);
+  }
+
+  update(delta) {
+    this.wek.update(delta);
+  }
+
+  mousemove(pt) {
+    this.navigator.setStartPoint(this.wek.pos.toClipper());
+    const promise = this.navigator.promiseShortestPath(pt.toClipper());
+    if(!promise)
+      return;
+    promise.then(data => {
+      this.wek.setPath(data.map(el => new __WEBPACK_IMPORTED_MODULE_2__utils_vector__["a" /* default */](el.X, el.Y)));
+      this.path = data;
+    });
+  }
+
+  _footprint() {
+    if (this.wek.velo.distanceSq() > 0) {
+      this.footprints[this.footprintsI] = {
+        pos: this.wek.pos,
+        rot: this.wek.rotation
+      };
+      this.footprintsI = (this.footprintsI + 1) % this.footprints.length;
+    }
+  }
+
+  draw(ctx) {
+    this._drawMap(ctx);
+    this._drawFootprints(ctx);
+    this._drawHoles(ctx);
+    this._drawPath(ctx);
+    this.wek.draw(ctx);
+  }
+
+  _drawPath(ctx) {
+    if(this.path && this.path.length > 0) {
+      ctx.beginPath();
+      ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["b" /* NODE_CONNECTION */];
+      ctx.lineWidth = 2;
+      ctx.moveTo(this.path[0].X, this.path[0].Y);
+      for(let i=1;i<this.path.length;i++) {
+        ctx.lineTo(this.path[i].X, this.path[i].Y);
+      }
+      ctx.stroke();
+    }
+  }
+
+  _drawFootprints(ctx) {
+    let width = 15;
+    const adjHeight = width / this.footprintImg.width * this.footprintImg.height;
+    for(let i=0;i<this.footprints.length;i++) {
+      const foot = this.footprints[i];
+      if(!foot)
+        break;
+      ctx.save();
+      ctx.translate(foot.pos.x, foot.pos.y);
+      ctx.rotate(foot.rot);
+      ctx.drawImage(this.footprintImg, - width/2, - adjHeight/2, width, adjHeight);
+      ctx.restore();
+    }
+  }
+
+  _drawMap(ctx) {
+    ctx.save();
+    ctx.lineWidth = 2;
+    for(let i=0;i<this.paths.length;i++) {
+      const path = this.paths[i];
+      ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["c" /* WEK_FORGROUND */];
+      if(this.holesI[i])
+        continue;
+      ctx.shadowColor = 'cornflowerblue';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 5;
+      ctx.shadowOffsetY = 5;
+      ctx.beginPath();
+      for(let j=0;j<path.length;j++) {
+        ctx.lineTo(path[j].X, path[j].Y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  _drawHoles(ctx) {
+
+    ctx.save();
+    for(let i=0;i<this.paths.length;i++) {
+      const path = this.paths[i];
+      ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["d" /* BLUEPRINT */];
+      if(!this.holesI[i])
+        continue;
+      ctx.shadowColor = 'cornflowerblue';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 5;
+      ctx.shadowOffsetY = 5;
+      ctx.beginPath();
+      for(let j=0;j<path.length;j++) {
+        ctx.lineTo(path[j].X, path[j].Y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (WekDriver);
+
+/***/ }),
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var twoProduct = __webpack_require__(7)
-var robustSum = __webpack_require__(27)
-var robustScale = __webpack_require__(25)
-var robustSubtract = __webpack_require__(26)
+var twoProduct = __webpack_require__(12)
+var robustSum = __webpack_require__(28)
+var robustScale = __webpack_require__(26)
+var robustSubtract = __webpack_require__(27)
 
 var NUM_EXPAND = 5
 
@@ -7776,7 +8483,7 @@ function generateOrientationProc() {
 generateOrientationProc()
 
 /***/ }),
-/* 7 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7815,21 +8522,23 @@ function twoProduct(a, b, result) {
 }
 
 /***/ }),
-/* 8 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__interface__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__draw_interface__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__clipper_map__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__automa_map__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__interface__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__draw_interface__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__clipper_map__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__automa_map__ = __webpack_require__(6);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_vector__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_nav_mesh__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__nav_mesh_animator__ = __webpack_require__(14);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__navigator__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__automa_to_clipper__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__wek_wek_driver__ = __webpack_require__(17);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__utils_colors__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__nav_mesh_animator__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__navigator__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__automa_to_clipper__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__wek_wek_driver__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__wek_generator__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_colors__ = __webpack_require__(0);
+
 
 
 
@@ -7848,18 +8557,9 @@ class Main {
     this.canvas = canvas;
     this.setSize();
 
-    this.automa = new __WEBPACK_IMPORTED_MODULE_3__automa_map__["a" /* default */] (
-      Math.floor(this.canvas.height / GRID),
-      Math.floor(this.canvas.width / GRID), GRID
-    );
-
     this.views = views;
-
+    this.regenWek();
     this._switchView(0);
-
-    this.automa.RandomFillMap();
-    this.automa.MakeCaverns();
-    this.gameObjects = [this.automa];
   }
 
   next(input) {
@@ -7872,12 +8572,26 @@ class Main {
       this["next" + input].apply(this, arguments);
   }
 
+  next0() {
+    this._switchView(1);
+
+    this.automa = new __WEBPACK_IMPORTED_MODULE_3__automa_map__["a" /* default */] (
+      Math.floor(this.canvas.height / GRID),
+      Math.floor(this.canvas.width / GRID), GRID
+    );
+
+    this.automa.RandomFillMap();
+    this.automa.MakeCaverns();
+    this.gameObjects = [this.automa];
+    this.wek = undefined;
+  }
+
   next1() {
     const converter = new __WEBPACK_IMPORTED_MODULE_8__automa_to_clipper__["a" /* default */](this.automa, GRID);
     this.clipperMap = converter.generateClipper();
     this.interface = new __WEBPACK_IMPORTED_MODULE_1__draw_interface__["a" /* default */](this.clipperMap);
     this.gameObjects = [this.interface, this.clipperMap];
-    this._switchView(1);
+    this._switchView(2);
 
     this.automa = undefined;
   }
@@ -7886,7 +8600,7 @@ class Main {
     // this.navMesh = new NavMesh(this.clipperMap);
     this.gameObjects.splice(0,1);
     this.playerDrop = true;
-    this._switchView(2);
+    this._switchView(3);
   }
 
   next3() {
@@ -7896,7 +8610,7 @@ class Main {
     };
     this.navMeshAnimator = new __WEBPACK_IMPORTED_MODULE_6__nav_mesh_animator__["a" /* default */](this.offsetMap, doneFunct);
     this.gameObjects = [this.navMeshAnimator, this.offsetMap, this.clipperMap];
-    this._switchView(3);
+    this._switchView(4);
 
     this.interface = undefined;
   }
@@ -7906,7 +8620,7 @@ class Main {
     this.navigator =
       new __WEBPACK_IMPORTED_MODULE_7__navigator__["a" /* default */](this.mesh, this.offsetMap, this.clipperMap.startPoint);
     this.gameObjects = [this.navigator, this.clipperMap];
-    this._switchView(4);
+    this._switchView(5);
 
     this.navMeshAnimator = undefined;
   }
@@ -7915,7 +8629,7 @@ class Main {
     // NB: Wek is the sound a penguin makes
     this.wek = new __WEBPACK_IMPORTED_MODULE_9__wek_wek_driver__["a" /* default */](this.navigator, this.clipperMap.paths, this.clipperMap.holesI);
     this.gameObjects = [this.wek];
-    this._switchView(5);
+    this._switchView(6);
   }
 
   reset() {
@@ -7936,6 +8650,13 @@ class Main {
     this.automa.RandomFillMap();
     this.automa.MakeCaverns();
   }
+
+  regenWek() {
+    const wekGenerator = new __WEBPACK_IMPORTED_MODULE_10__wek_generator__["a" /* default */](this.width, this.height, GRID);
+    this.wek = wekGenerator.wek;
+    this.gameObjects = [this.wek];
+  }
+
 
   regenAutoma() {
     this.automa.RandomFillMap();
@@ -7979,7 +8700,7 @@ class Main {
   }
 
   _drawGrid(ctx) {
-    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_10__utils_colors__["a" /* GRID_LINES */];
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_11__utils_colors__["a" /* GRID_LINES */];
     ctx.lineWidth = .1;
 
     for(let x=0;x<this.width;x+=GRID) {
@@ -8071,320 +8792,13 @@ class Main {
 
 
 /***/ }),
-/* 9 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_colors__ = __webpack_require__(0);
-
-class AutomaMap {
-  constructor(mapWidth, mapHeight, grid, percentWalls = 50) {
-		this.MapWidth = mapWidth;
-		this.MapHeight = mapHeight;
-		this.PercentAreWalls = percentWalls;
-
-    this.grid = grid;
-	}
-
-  MakeCaverns() {
-		for(let row=0; row <= this.MapHeight-1; row++)
-			for(let column = 0; column <= this.MapWidth-1; column++)
-				this.Map[column][row] = this.PlaceWallLogic(column,row);
-	}
-
-	PlaceWallLogic(x, y) {
-		let numWalls = this.GetAdjacentWalls(x,y,1,1);
-		if(this.Map[x][y] === 1) {
-			if( numWalls >= 4 )
-				return 1;
-			if(numWalls < 2)
-				return 0;
-		}
-		else {
-			if(numWalls >= 5)
-				return 1;
-		}
-		return 0;
-	}
-
-  GetAdjacentWalls(x, y, scopeX = 1, scopeY = 1) {
-		let startX = x - scopeX;
-		let startY = y - scopeY;
-		let endX = x + scopeX;
-		let endY = y + scopeY;
-
-		let iX = startX;
-		let iY = startY;
-
-		let wallCounter = 0;
-
-		for(iY = startY; iY <= endY; iY++) {
-			for(iX = startX; iX <= endX; iX++) {
- 				if(!(iX === x && iY === y)) {
-					if(this.IsWall(iX,iY))
-						wallCounter += 1;
-				}
-			}
-		}
-		return wallCounter;
-	}
-
-  IsWall(x, y) {
-		// Consider out-of-bound a wall
-		if(this.IsOutOfBounds(x,y))
-			return true;
-
-		if(this.Map[x][y] === 1)
-			return true;
-
-		if(this.Map[x][y] === 0)
-			return false;
-
-		return false;
-	}
-
-  IsOutOfBounds(x, y) {
-		if(x<0 || y<0)
-			return true;
-		if(x > this.MapWidth-1 || y > this.MapHeight-1 )
-			return true;
-		return false;
-	}
-
-  RandomFillMap() {
-		// New, empty map
-    this.Map = new Array(this.MapWidth);
-    for(let q=0;q<this.Map.length;q++) {
-      let def = new Array(this.MapHeight);
-      def.fill(0);
-      this.Map[q] = def;
-    }
-
-		let mapMiddle = 0; // Temp variable
-		for(let row=0; row < this.MapHeight; row++) {
-			for(let column = 0; column < this.MapWidth; column++)
-			{
-				// If coordinants lie on the the edge of the map (creates a border)
-				if(column === 0)
-					this.Map[column][row] = 1;
-				else if (row === 0)
-					this.Map[column][row] = 1;
-				else if (column === this.MapWidth-1)
-					this.Map[column][row] = 1;
-				else if (row === this.MapHeight-1)
-					this.Map[column][row] = 1;
-				// Else, fill with a wall a random percent of the time
-				else
-				{
-					mapMiddle = (this.MapHeight / 2);
-
-					if(row === mapMiddle)
-						this.Map[column][row] = 0;
-					else
-						this.Map[column][row] = this.RandomPercent(this.PercentAreWalls);
-				}
-			}
-		}
-	}
-
-  RandomPercent(percent) {
-		if(percent >= Math.random() * 100 + 1)
-			return 1;
-		return 0;
-	}
-
-  setSize(width, height) {
-    this.MapHeight = Math.floor(width / this.grid);
-    this.MapWidth = Math.floor(height / this.grid);
-  }
-
-  draw(ctx) {
-    if(!this.Map)
-      return;
-
-    ctx.beginPath();
-    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_0__utils_colors__["i" /* AUTOMA_BORDER */];
-    for(let i=0;i< this.Map.length;i++) {
-      for(let j=0;j<this.Map[i].length;j++) {
-        if(this.Map[i][j] !== 0){
-          ctx.rect(j*this.grid, i*this.grid, this.grid, this.grid);
-        }
-      }
-    }
-    ctx.fill();
-  }
-}
-
-/* harmony default export */ __webpack_exports__["a"] = (AutomaMap);
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__clipper_map__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_concaveman__ = __webpack_require__(19);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_concaveman___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_concaveman__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_js_clipper__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_js_clipper__);
-
-
-
-
-
-class AutomaToClipperConverter {
-  constructor(automa, grid) {
-    this.automa = automa.Map;
-    this.grid = grid;
-    this.edges = {};
-    // find all points on edges. O(n^2)
-    for(let i=0;i<this.automa.length;i++) {
-      for(let j=0;j<this.automa[i].length;j++) {
-        const neighs = this._getNeighbors(i, j);
-        if(this.automa[i][j] && this._isOnEdgeCardinally(i,j))
-          this.edges[this._hash(i, j)] = [i,j];
-      }
-    }
-
-    this._seperatePolys();
-
-    this._concaveman();
-  }
-
-  generateClipper() {
-    const clipperPolys = new Array(this.seperatedPolys.length);
-    for(let i=0; i<this.seperatedPolys.length; i++) {
-      clipperPolys[i] = this.seperatedPolys[i].map((pt) => {
-          return new __WEBPACK_IMPORTED_MODULE_2_js_clipper__["IntPoint"] (
-            pt[1], pt[0]
-          );
-       });
-    }
-    return new __WEBPACK_IMPORTED_MODULE_0__clipper_map__["a" /* default */](clipperPolys);
-  }
-
-  _concaveman() {
-    for(let i=0;i<this.seperatedPolys.length;i++) {
-      // let expandedPoly = this.seperatedPolys[i].map(el => [el[0] * (1/100000), el[1] * (1/100000)]);
-      this.seperatedPolys[i] = __WEBPACK_IMPORTED_MODULE_1_concaveman___default()(this.seperatedPolys[i], .5, 0);
-      // this.seperatedPolys[i] = expandedPoly.map(el => [el[0] / (1/100000), el[1] /(1/100000)]);
-    }
-  }
-
-  _seperatePolys() {
-    this.touchedPoints = {};
-    this.seperatedPolys = [];
-    const edges = Object.values(this.edges);
-    for(let i=0;i<edges.length;i++) {
-      this.streak = [];
-      this._touch(edges[i]);
-      if(this.streak.length >= 3)
-        this.seperatedPolys.push(this.streak);
-    }
-    // cleanup
-    this.touchedPoints = undefined;
-    this.streak = undefined;
-  }
-
-  _touch(edge) {
-    const hashMe = this._hash(edge[0], edge[1]);
-    // if point is already visited - visit no more
-    if(this.touchedPoints[hashMe])
-      return;
-    this.touchedPoints[hashMe] = edge;
-    // if point is edge but point is not yet touched
-    if(this.edges[hashMe]) {
-      const displayEdge = [
-        edge[0]*this.grid + this.grid,
-        edge[1]*this.grid + this.grid
-      ];
-      this.streak.push(displayEdge);
-      const neighs = this._getNeighbors(edge[0], edge[1]);
-      for(let i=0;i<neighs.length;i++)
-        this._touch(neighs[i]);
-    }
-  }
-
-
-  // 15,485,867 will suffice as a prime number here
-  _hash(r,c) {
-    return (15485867 + r) * 15485867 + c;
-  }
-
-  _isOnEdgeDiagonally(x,y) {
-    for(let i=x-1;i<=x+1;i++) {
-      for(let j=y-1;j<=y+1;j++) {
-        if((i===x && j===y) || i < 0 || j < 0
-          || i >= this.automa.length || j >= this.automa[i].length)
-            continue;
-        if(!this.automa[i][j])
-          return true;
-      }
-    }
-    return false;
-  }
-
-  _isOnEdgeCardinally(r,c) {
-    const a = this.automa;
-    if(this._rowInBounds(r-1) && !this.automa[r-1][c])
-      return true;
-    if(this._rowInBounds(r+1) && !this.automa[r+1][c])
-      return true;
-    if(this._colInBounds(c-1) && !this.automa[r][c-1])
-      return true;
-    if(this._colInBounds(c+1) && !this.automa[r][c+1])
-      return true;
-    return false;
-  }
-
-  _rowInBounds(r) {
-    return r >= 0 && r < this.automa.length;
-  }
-
-  _colInBounds(c) {
-    return c >= 0 && c < this.automa[0].length;
-  }
-
-  _getNeighbors(x,y) {
-    const answer = [];
-    for(let i=x-1;i<=x+1;i++) {
-      for(let j=y-1;j<=y+1;j++) {
-        if((i===x && j===y) || i < 0 || j < 0
-          || i >= this.automa.length || j >= this.automa[i].length)
-            continue;
-        if(this.automa[i][j])
-          answer.push([i,j]);
-      }
-    }
-    return answer;
-  }
-
-  // Draw the converter as a game object only for debugging purposes
-  draw(ctx) {
-    // const edges = Object.values(this.edges);
-    // for(let i=0;i<edges.length;i++){
-    //   ctx.beginPath();
-    //   const r = edges[i][0];
-    //   const c = edges[i][1];
-    //   ctx.rect(c*this.grid, r*this.grid, this.grid, this.grid);
-    //   ctx.fillStyle = "red";
-    //   ctx.fill();
-    // }
-  }
-}
-
-/* harmony default export */ __webpack_exports__["a"] = (AutomaToClipperConverter);
-
-
-/***/ }),
-/* 11 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_js_clipper__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_mesh_guru__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_mesh_guru__ = __webpack_require__(4);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_colors__ = __webpack_require__(0);
 
 
@@ -8413,6 +8827,14 @@ class ClipperOffsetMap {
     c.AddPaths(slimBoundard, __WEBPACK_IMPORTED_MODULE_0_js_clipper__["PolyType"].ptSubject, true);
     c.AddPaths(bigHoles, __WEBPACK_IMPORTED_MODULE_0_js_clipper__["PolyType"].ptClip, true);
     c.Execute(__WEBPACK_IMPORTED_MODULE_0_js_clipper__["ClipType"].ctDifference, this.paths);
+  }
+
+  getAnyPoint() {
+    for(let i=0;i<this.paths.length;i++) {
+      for(let j=0;j<this.paths[i].length;j++) {
+        return this.paths[i][j];
+      }
+    }
   }
 
   contains(pt) {
@@ -8451,7 +8873,7 @@ class ClipperOffsetMap {
 
 
 /***/ }),
-/* 12 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8578,7 +9000,7 @@ class DrawInterface {
 /* harmony default export */ __webpack_exports__["a"] = (DrawInterface);
 
 /***/ }),
-/* 13 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8693,258 +9115,7 @@ class Interface {
 
 
 /***/ }),
-/* 14 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_js_clipper__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_mesh_guru__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_colors__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_nav_mesh__ = __webpack_require__(5);
-
-
-
-
-const TICK = 20;
-const TICK_AFTER = 20;
-class NavMeshAnimator {
-  constructor(clipperMap, doneFunction) {
-    this.clipperMap = clipperMap;
-    this.doneFunction = doneFunction;
-    this.allVerts = [];
-    this.allConnects = [];
-    this.bounds = clipperMap.bounds;
-    this._generateNodes();
-    this._connectNodes();
-
-    // Visual timer stuff
-    this.tickCountdown = TICK;
-    this.tickAfter = 0;
-    this.visibleVerts = [];
-    this.visibleConnections = [];
-  }
-
-  _connectNodes() {
-    for(let i=0;i<this.allVerts.length;i++) {
-      for(let j=0;j<this.allVerts.length;j++) {
-        if(i === j || !this.allVerts[i].isNode || !this.allVerts[j].isNode)
-          continue;
-        const inSight = this.clipperMap.inLineOfSight(this.allVerts[i].value, this.allVerts[j].value);
-        if(inSight)
-          this.allConnects.push([i,j]);
-      }
-    }
-  }
-
-  _generateNodes() {
-    const clipperMap = this.clipperMap;
-    for(let i=0;i<clipperMap.paths.length;i++) {
-      const poly = clipperMap.paths[i];
-      for(let j=0;j<poly.length;j++) {
-        this.allVerts.push({
-          value: poly[j],
-          // javascript XOR on booleans is a bit strange...
-          isNode: __WEBPACK_IMPORTED_MODULE_1__utils_mesh_guru__["a" /* isVertexConcave */](poly, j)
-        });
-      }
-    }
-  }
-
-  update(delta) {
-    this.tickCountdown -= delta;
-    if(this.tickCountdown < 0) {
-      this._update();
-      this.tickCountdown = TICK;
-    }
-  }
-
-  _update() {
-    if(this.visibleVerts.length < this.allVerts.length) {
-      this.visibleVerts.push(
-        this.allVerts[this.visibleVerts.length]
-      );
-    }
-    else if(this.visibleConnections.length < this.allConnects.length) {
-      const toPush = [];
-      for(let i=this.visibleConnections.length;i < this.allConnects.length;i++ ){
-        if(toPush.length === 0)
-          toPush.push(this.allConnects[i]);
-        else {
-          if(toPush[toPush.length-1][0] !== this.allConnects[i][0])
-            break;
-          toPush.push(this.allConnects[i]);
-        }
-      }
-      this.visibleConnections = this.visibleConnections.concat(toPush);
-    } else {
-      if(this.tickAfter > TICK_AFTER)
-        this.doneFunction();
-      this.tickAfter ++;
-    }
-  }
-
-  draw(ctx) {
-    for(let i=0;i<this.visibleVerts.length;i++) {
-      const v = this.visibleVerts[i];
-      ctx.fillStyle = v.isNode ? __WEBPACK_IMPORTED_MODULE_2__utils_colors__["f" /* NODE_CORRECT */] : __WEBPACK_IMPORTED_MODULE_2__utils_colors__["g" /* NODE_INCORRECT */];
-      ctx.beginPath();
-      ctx.arc(v.value.X, v.value.Y, 4, 0, 2 * Math.PI, false);
-      ctx.fill();
-      ctx.stroke();
-    }
-
-    ctx.beginPath();
-    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_2__utils_colors__["b" /* NODE_CONNECTION */];
-    ctx.lineWidth = .4;
-    for(let i=0;i<this.visibleConnections.length;i++) {
-      const from = this.allVerts[this.visibleConnections[i][0]].value;
-      const to = this.allVerts[this.visibleConnections[i][1]].value;
-      ctx.moveTo(from.X, from.Y);
-      ctx.lineTo(to.X, to.Y);
-    }
-    ctx.stroke();
-  }
-
-  generateMesh() {
-    const verts = [];
-    // get all verts
-    for(let i=0;i<this.allVerts.length;i++) {
-      const curr = this.allVerts[i];
-      if(curr.isNode)
-        verts.push(curr.value);
-    }
-    return new __WEBPACK_IMPORTED_MODULE_3__utils_nav_mesh__["a" /* default */](verts, this.allConnects.map(c => {
-      return [this.allVerts[c[0]].value, this.allVerts[c[1]].value];
-    }));
-  }
-}
-
-/* harmony default export */ __webpack_exports__["a"] = (NavMeshAnimator);
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_colors__ = __webpack_require__(0);
-
-
-const EPSILON = 5;
-class Navigator {
-  constructor(mesh, clipperMap, startPoint) {
-    this.clipperMap = clipperMap;
-    this.mesh = mesh;
-    this._reconnectStartNode(startPoint);
-    this.startPoint = startPoint;
-  }
-
-  setStartPoint(pt) {
-    this._reconnectStartNode(pt);
-  }
-
-  promiseShortestPath(endPoint) {
-    return this._reconnectEndNode(endPoint);
-  }
-
-  mousemove(pt) {
-    pt = this._convertPoint(pt);
-    this._reconnectEndNode(pt);
-  }
-
-  _reconnectStartNode(pt) {
-    if(this.clipperMap.contains(pt)) {
-      if(this.start)
-        this.mesh.removeNode(this.start);
-      //add node
-      this.start = this.mesh.addNode(pt);
-      this._connectTempNode(this.start);
-    }
-  }
-
-  _reconnectEndNode(pt) {
-    if(this.clipperMap.contains(pt)) {
-      const promise = new Promise((resolver) => {
-        if(this.goal)
-          this.mesh.removeNode(this.goal);
-        //add node
-        this.goal = this.mesh.addNode(pt);
-        this._connectTempNode(this.goal);
-        resolver(this.mesh.aStar(this.start, this.goal));
-      });
-      promise.then(data => {this.path = data;});
-      return promise;
-    }
-    return undefined;
-  }
-
-  _connectTempNode(node) {
-    // connect node to entire map
-    const cm = this.clipperMap;
-    const verts = this.mesh.getVerts();
-    for(let i=0;i<verts.length;i++) {
-      if(cm.inLineOfSight(verts[i].value, node.value)) {
-        this.mesh.connectNodes(verts[i], node);
-      }
-    }
-    if(this.start && this.goal) {
-      if(cm.inLineOfSight(this.start.value, this.goal.value)) {
-        this.mesh.connectNodes(this.start, this.goal);
-      }
-      else
-        this.mesh.disconnectNodes(this.start, this.goal);
-    }
-  }
-
-  _convertPoint(pt) {
-    return {X: pt.x, Y: pt.y};
-  }
-
-  update(delta) {
-
-  }
-
-  draw(ctx) {
-    const verts = this.mesh.getVerts();
-    ctx.beginPath();
-    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_0__utils_colors__["b" /* NODE_CONNECTION */];
-    ctx.lineWidth = .4;
-    for(let i=0;i<verts.length;i++) {
-      const from = verts[i];
-      for(let j=0;j<from.neighbors.length;j++) {
-        ctx.moveTo(from.value.X, from.value.Y);
-        ctx.lineTo(from.neighbors[j].value.X, from.neighbors[j].value.Y);
-      }
-    }
-    ctx.stroke();
-
-    for(let i=0;i<verts.length;i++) {
-      const v = verts[i];
-      ctx.beginPath();
-      ctx.arc(v.value.X, v.value.Y, 4, 0, 2 * Math.PI, false);
-      ctx.fill();
-      ctx.stroke();
-    }
-
-    if(this.path && this.path.length > 0) {
-      ctx.beginPath();
-      ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_0__utils_colors__["e" /* PATH */];
-      ctx.lineWidth = 4;
-      ctx.moveTo(this.path[0].X, this.path[0].Y);
-      for(let i=1;i<this.path.length;i++) {
-        ctx.lineTo(this.path[i].X, this.path[i].Y);
-      }
-      ctx.stroke();
-    }
-  }
-}
-
-/* harmony default export */ __webpack_exports__["a"] = (Navigator);
-
-
-/***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8958,7 +9129,7 @@ class Wek {
     this.pos = new __WEBPACK_IMPORTED_MODULE_0__utils_vector__["a" /* default */](startPos.X, startPos.Y);
     this.img = document.getElementById("wek");
     this.scale = 1.0 - 75 / this.img.width;
-    this.rotation = Math.PI / 2;
+    this.rotation = Math.PI;
     this.velo = new __WEBPACK_IMPORTED_MODULE_0__utils_vector__["a" /* default */](0, 0);
   }
 
@@ -9000,145 +9171,73 @@ class Wek {
 /* harmony default export */ __webpack_exports__["a"] = (Wek);
 
 /***/ }),
-/* 17 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__wek__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_colors__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_vector__ = __webpack_require__(1);
-
-
-
-
-class WekDriver {
-  constructor(navigator, paths, holesI) {
-    this.navigator = navigator;
-    this.paths = paths;
-    this.holesI = holesI;
-    this.wek = new __WEBPACK_IMPORTED_MODULE_0__wek__["a" /* default */](this.navigator.startPoint);
-    this.footprintImg = document.getElementById("footprints");
-    this.footprints = new Array(50);
-    this.footprintsI = 0;
-    window.setInterval(this._footprint.bind(this), 200);
-  }
-
-  update(delta) {
-    this.wek.update(delta);
-  }
-
-  mousemove(pt) {
-    this.navigator.setStartPoint(this.wek.pos.toClipper());
-    const promise = this.navigator.promiseShortestPath(pt.toClipper());
-    if(!promise)
-      return;
-    promise.then(data => {
-      this.wek.setPath(data.map(el => new __WEBPACK_IMPORTED_MODULE_2__utils_vector__["a" /* default */](el.X, el.Y)));
-      this.path = data;
-    });
-  }
-
-  _footprint() {
-    if (this.wek.velo.distanceSq() > 0) {
-      this.footprints[this.footprintsI] = {
-        pos: this.wek.pos,
-        rot: this.wek.rotation
-      };
-      this.footprintsI = (this.footprintsI + 1) % this.footprints.length;
-      console.log(this.footprints);
-    }
-  }
-
-  draw(ctx) {
-    this._drawMap(ctx);
-    this._drawFootprints(ctx);
-    this._drawHoles(ctx);
-    this._drawPath(ctx);
-    this.wek.draw(ctx);
-  }
-
-  _drawPath(ctx) {
-    if(this.path && this.path.length > 0) {
-      ctx.beginPath();
-      ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["b" /* NODE_CONNECTION */];
-      ctx.lineWidth = 2;
-      ctx.moveTo(this.path[0].X, this.path[0].Y);
-      for(let i=1;i<this.path.length;i++) {
-        ctx.lineTo(this.path[i].X, this.path[i].Y);
-      }
-      ctx.stroke();
-    }
-  }
-
-  _drawFootprints(ctx) {
-    let width = 15;
-    const adjHeight = width / this.footprintImg.width * this.footprintImg.height;
-    for(let i=0;i<this.footprints.length;i++) {
-      const foot = this.footprints[i];
-      if(!foot)
-        break;
-      ctx.save();
-      ctx.translate(foot.pos.x, foot.pos.y);
-      ctx.rotate(foot.rot);
-      ctx.drawImage(this.footprintImg, - width/2, - adjHeight/2, width, adjHeight);
-      ctx.restore();
-    }
-  }
-
-  _drawMap(ctx) {
-    ctx.save();
-    ctx.lineWidth = 2;
-    for(let i=0;i<this.paths.length;i++) {
-      const path = this.paths[i];
-      ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["c" /* WEK_FORGROUND */];
-      if(this.holesI[i])
-        continue;
-      ctx.shadowColor = 'cornflowerblue';
-      ctx.shadowBlur = 5;
-      ctx.shadowOffsetX = 5;
-      ctx.shadowOffsetY = 5;
-      ctx.beginPath();
-      for(let j=0;j<path.length;j++) {
-        ctx.lineTo(path[j].X, path[j].Y);
-      }
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  _drawHoles(ctx) {
-
-    ctx.save();
-    for(let i=0;i<this.paths.length;i++) {
-      const path = this.paths[i];
-      ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["d" /* BLUEPRINT */];
-      if(!this.holesI[i])
-        continue;
-      ctx.shadowColor = 'cornflowerblue';
-      ctx.shadowBlur = 5;
-      ctx.shadowOffsetX = 5;
-      ctx.shadowOffsetY = 5;
-      ctx.beginPath();
-      for(let j=0;j<path.length;j++) {
-        ctx.lineTo(path[j].X, path[j].Y);
-      }
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-}
-
-/* harmony default export */ __webpack_exports__["a"] = (WekDriver);
-
-/***/ }),
 /* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__clipper_map__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__automa_map__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_vector__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_nav_mesh__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__nav_mesh_animator__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__navigator__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__automa_to_clipper__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__wek_wek_driver__ = __webpack_require__(10);
+
+
+
+
+
+
+
+
+
+class WekGenerator {
+  constructor(width, height, grid) {
+    this.grid = grid;
+    this.width = width;
+    this.height = height;
+    this.regenerate();
+  }
+
+  regenerate() {
+    this._constructAutoma();
+    this._constructClipper();
+    this._constructMesh();
+    this.wek = new __WEBPACK_IMPORTED_MODULE_7__wek_wek_driver__["a" /* default */](this.navigator, this.clipperMap.paths, this.clipperMap.holesI);
+  }
+
+  _constructAutoma() {
+    this.automa = new __WEBPACK_IMPORTED_MODULE_1__automa_map__["a" /* default */] (
+      Math.floor(this.height / this.grid),
+      Math.floor(this.width / this.grid), this.grid
+    );
+    this.automa.RandomFillMap();
+    this.automa.MakeCaverns();
+  }
+
+  _constructClipper() {
+    const converter = new __WEBPACK_IMPORTED_MODULE_6__automa_to_clipper__["a" /* default */](this.automa, this.grid);
+    this.clipperMap = converter.generateClipper();
+  }
+
+  _constructMesh() {
+    const offsetMap = this.clipperMap.selectPrimaryBiggest();
+    const navMeshAnimator = new __WEBPACK_IMPORTED_MODULE_4__nav_mesh_animator__["a" /* default */](offsetMap, () => {});
+    this.navigator =
+      new __WEBPACK_IMPORTED_MODULE_5__navigator__["a" /* default */](navMeshAnimator.generateMesh(), offsetMap, this.clipperMap.startPoint);
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (WekGenerator);
+
+/***/ }),
+/* 19 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_main__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_main__ = __webpack_require__(13);
 
 
 /**** DOCUMENT *****/
@@ -9152,10 +9251,9 @@ document.addEventListener("DOMContentLoaded", function() {
   };
   resize();
   window.addEventListener("resize", resize);
-
-  const views = new Array(6);
-  for(let i=1;i<=views.length;i++) {
-    views[i-1] = document.getElementById("step-" + i);
+  const views = new Array(7);
+  for(let i=0;i<7;i++) {
+    views[i] = document.getElementById("step-" + i);
   }
 
   const main = new __WEBPACK_IMPORTED_MODULE_0__lib_main__["a" /* default */](canvasEl, views);
@@ -9166,16 +9264,17 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("regenAutoma").addEventListener("click", (e) => main.regenAutoma());
   document.getElementById("clipperPlus").addEventListener("click", (e) => main.polygonClip(true));
   document.getElementById("clipperMinus").addEventListener("click", (e) => main.polygonClip(false));
+  document.getElementById("regen").addEventListener("click", (e) => main.regenWek());
+
 
 
   // Step Flow Events
+  document.getElementById("next-0").addEventListener("click", (e) => main.next(0));
   document.getElementById("next-1").addEventListener("click", (e) => main.next(1));
   document.getElementById("next-2").addEventListener("click", (e) => main.next(2));
   document.getElementById("next-4").addEventListener("click", (e) => main.next(4));
   document.getElementById("next-5").addEventListener("click", (e) => main.next(5));
   // document.getElementById("reset").addEventListener("click", (e) => main.next(-1));
-
-
 
   // Mouse sensory events
   window.addEventListener("keydown", (e) => main.keyDown(e.keyCode), true);
@@ -9191,17 +9290,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var rbush = __webpack_require__(24);
-var convexHull = __webpack_require__(21);
-var Queue = __webpack_require__(28);
-var pointInPolygon = __webpack_require__(22);
-var orient = __webpack_require__(6)[3];
+var rbush = __webpack_require__(25);
+var convexHull = __webpack_require__(22);
+var Queue = __webpack_require__(29);
+var pointInPolygon = __webpack_require__(23);
+var orient = __webpack_require__(11)[3];
 
 module.exports = concaveman;
 module.exports.default = concaveman;
@@ -9538,7 +9637,7 @@ function sqSegSegDist(x0, y0, x1, y1, x2, y2, x3, y3) {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var require;var require;(function(f){if(true){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.PriorityQueue = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return require(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -9930,7 +10029,7 @@ module.exports = BinaryHeapStrategy = (function() {
 });
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9938,7 +10037,7 @@ module.exports = BinaryHeapStrategy = (function() {
 
 module.exports = monotoneConvexHull2D
 
-var orient = __webpack_require__(6)[3]
+var orient = __webpack_require__(11)[3]
 
 function monotoneConvexHull2D(points) {
   var n = points.length
@@ -10017,7 +10116,7 @@ function monotoneConvexHull2D(points) {
 }
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 module.exports = function (point, vs) {
@@ -10041,7 +10140,7 @@ module.exports = function (point, vs) {
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10108,7 +10207,7 @@ function defaultCompare(a, b) {
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10116,7 +10215,7 @@ function defaultCompare(a, b) {
 
 module.exports = rbush;
 
-var quickselect = __webpack_require__(23);
+var quickselect = __webpack_require__(24);
 
 function rbush(maxEntries, format) {
     if (!(this instanceof rbush)) return new rbush(maxEntries, format);
@@ -10676,14 +10775,14 @@ function multiSelect(arr, left, right, n, compare) {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var twoProduct = __webpack_require__(7)
-var twoSum = __webpack_require__(29)
+var twoProduct = __webpack_require__(12)
+var twoSum = __webpack_require__(30)
 
 module.exports = scaleLinearExpansion
 
@@ -10732,7 +10831,7 @@ function scaleLinearExpansion(e, scale) {
 }
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10894,7 +10993,7 @@ function robustSubtract(e, f) {
 }
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11056,7 +11155,7 @@ function linearExpansionSum(e, f) {
 }
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11148,7 +11247,7 @@ TinyQueue.prototype = {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
