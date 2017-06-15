@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 19);
+/******/ 	return __webpack_require__(__webpack_require__.s = 20);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -7437,7 +7437,7 @@ const contains = function(path, position, toleranceOnOutside = true) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_priority_queue__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_priority_queue__ = __webpack_require__(22);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_js_priority_queue__);
 
 class NavMesh {
@@ -7750,7 +7750,7 @@ class AutomaMap {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__clipper_map__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_concaveman__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_concaveman__ = __webpack_require__(21);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_concaveman___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_concaveman__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_js_clipper__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_js_clipper__);
@@ -8159,7 +8159,7 @@ class Navigator {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__wek__ = __webpack_require__(17);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__wek__ = __webpack_require__(18);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_colors__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_vector__ = __webpack_require__(1);
 
@@ -8294,9 +8294,9 @@ class WekDriver {
 
 
 var twoProduct = __webpack_require__(12)
-var robustSum = __webpack_require__(28)
-var robustScale = __webpack_require__(26)
-var robustSubtract = __webpack_require__(27)
+var robustSum = __webpack_require__(29)
+var robustScale = __webpack_require__(27)
+var robustSubtract = __webpack_require__(28)
 
 var NUM_EXPAND = 5
 
@@ -8526,18 +8526,20 @@ function twoProduct(a, b, result) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__interface__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__interface__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__draw_interface__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__clipper_map__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__automa_map__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_vector__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_nav_mesh__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__nav_mesh_animator__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__navigator__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__automa_to_clipper__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__wek_wek_driver__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__wek_generator__ = __webpack_require__(18);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__utils_colors__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__draw_only_interface__ = __webpack_require__(16);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__clipper_map__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__automa_map__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_vector__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__utils_nav_mesh__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__nav_mesh_animator__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__navigator__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__automa_to_clipper__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__wek_wek_driver__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__wek_generator__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__utils_colors__ = __webpack_require__(0);
+
 
 
 
@@ -8575,7 +8577,7 @@ class Main {
   next0() {
     this._switchView(1);
 
-    this.automa = new __WEBPACK_IMPORTED_MODULE_3__automa_map__["a" /* default */] (
+    this.automa = new __WEBPACK_IMPORTED_MODULE_4__automa_map__["a" /* default */] (
       Math.floor(this.canvas.height / GRID),
       Math.floor(this.canvas.width / GRID), GRID
     );
@@ -8587,9 +8589,9 @@ class Main {
   }
 
   next1() {
-    const converter = new __WEBPACK_IMPORTED_MODULE_8__automa_to_clipper__["a" /* default */](this.automa, GRID);
+    const converter = new __WEBPACK_IMPORTED_MODULE_9__automa_to_clipper__["a" /* default */](this.automa, GRID);
     this.clipperMap = converter.generateClipper();
-    this.interface = new __WEBPACK_IMPORTED_MODULE_1__draw_interface__["a" /* default */](this.clipperMap);
+    this.interface = new __WEBPACK_IMPORTED_MODULE_2__draw_only_interface__["a" /* default */](this.clipperMap);
     this.gameObjects = [this.interface, this.clipperMap];
     this._switchView(2);
 
@@ -8608,7 +8610,7 @@ class Main {
     const doneFunct = () => {
       this.next(4);
     };
-    this.navMeshAnimator = new __WEBPACK_IMPORTED_MODULE_6__nav_mesh_animator__["a" /* default */](this.offsetMap, doneFunct);
+    this.navMeshAnimator = new __WEBPACK_IMPORTED_MODULE_7__nav_mesh_animator__["a" /* default */](this.offsetMap, doneFunct);
     this.gameObjects = [this.navMeshAnimator, this.offsetMap, this.clipperMap];
     this._switchView(4);
 
@@ -8618,7 +8620,7 @@ class Main {
   next4() {
     this.mesh = this.navMeshAnimator.generateMesh();
     this.navigator =
-      new __WEBPACK_IMPORTED_MODULE_7__navigator__["a" /* default */](this.mesh, this.offsetMap, this.clipperMap.startPoint);
+      new __WEBPACK_IMPORTED_MODULE_8__navigator__["a" /* default */](this.mesh, this.offsetMap, this.clipperMap.startPoint);
     this.gameObjects = [this.navigator, this.clipperMap];
     this._switchView(5);
 
@@ -8627,7 +8629,7 @@ class Main {
 
   next5() {
     // NB: Wek is the sound a penguin makes
-    this.wek = new __WEBPACK_IMPORTED_MODULE_9__wek_wek_driver__["a" /* default */](this.navigator, this.clipperMap.paths, this.clipperMap.holesI);
+    this.wek = new __WEBPACK_IMPORTED_MODULE_10__wek_wek_driver__["a" /* default */](this.navigator, this.clipperMap.paths, this.clipperMap.holesI);
     this.gameObjects = [this.wek];
     this._switchView(6);
   }
@@ -8652,7 +8654,7 @@ class Main {
   }
 
   regenWek() {
-    const wekGenerator = new __WEBPACK_IMPORTED_MODULE_10__wek_generator__["a" /* default */](this.width, this.height, GRID);
+    const wekGenerator = new __WEBPACK_IMPORTED_MODULE_11__wek_generator__["a" /* default */](this.width, this.height, GRID);
     this.wek = wekGenerator.wek;
     this.gameObjects = [this.wek];
   }
@@ -8700,7 +8702,7 @@ class Main {
   }
 
   _drawGrid(ctx) {
-    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_11__utils_colors__["a" /* GRID_LINES */];
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_12__utils_colors__["a" /* GRID_LINES */];
     ctx.lineWidth = .1;
 
     for(let x=0;x<this.width;x+=GRID) {
@@ -8778,7 +8780,7 @@ class Main {
     var rect = this.canvas.getBoundingClientRect();
     let x = e.x - rect.left;
     let y =  e.y - rect.top;
-    return new __WEBPACK_IMPORTED_MODULE_4__utils_vector__["a" /* default */](x, y);
+    return new __WEBPACK_IMPORTED_MODULE_5__utils_vector__["a" /* default */](x, y);
   }
 
   mousewheel(e) {
@@ -8997,10 +8999,103 @@ class DrawInterface {
   }
 }
 
-/* harmony default export */ __webpack_exports__["a"] = (DrawInterface);
+/* unused harmony default export */ var _unused_webpack_default_export = (DrawInterface);
 
 /***/ }),
 /* 16 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_js_clipper___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_js_clipper__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_vector__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_colors__ = __webpack_require__(0);
+
+
+
+
+const EPSILON = 10;
+const TICK = 8;
+class DrawOnlyInterface {
+  constructor(map) {
+    this.map = map;
+    this.currPath = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Path"]();
+    this.isDrawing = false;
+    this.mouseCalls = 0;
+  }
+
+  update(deltaTime) {}
+
+  draw(ctx) {
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_2__utils_colors__["h" /* BORDER */];
+    for(let i=0;i<this.currPath.length;i++) {
+      const pt = this.currPath[i];
+      ctx.lineTo(pt.X, pt.Y);
+      ctx.rect(pt.X - 2.5, pt.Y - 2.5, 5, 5);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+
+    ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_2__utils_colors__["h" /* BORDER */];
+    ctx.strokeStyle = __WEBPACK_IMPORTED_MODULE_2__utils_colors__["h" /* BORDER */];
+    ctx.lineWidth = 1;
+    for(let i=0;i<this.map.paths.length;i++) {
+      const path = this.map.paths[i];
+      for(let j=0;j<path.length;j++) {
+        ctx.beginPath();
+        ctx.arc(path[j].X, path[j].Y, 2, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+  }
+
+  /********** EVENTS *********/
+
+  mousedown(pt) {
+    this.mouseDrag = true;
+
+    this.isDrawing = true;
+    this.currPath.push(new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["IntPoint"](pt.x, pt.y));
+    this.currPath.push(new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["IntPoint"](pt.x, pt.y));
+  }
+
+  mousemove(pt) {
+    if(this.mouseDrag && this.isDrawing) {
+      this.currPath[this.currPath.length - 1] = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["IntPoint"](pt.x, pt.y);
+      if(this.mouseCalls % TICK === 0) {
+        let point = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["IntPoint"](pt.x, pt.y);
+        this.currPath.push(point);
+      }
+      this.mouseCalls++;
+    }
+  }
+
+  keyDown(key) {
+  }
+
+  mouseup(pt) {
+    this.mouseDrag = false;
+    if(this.isDrawing) {
+      this.closePath();
+      this.isDrawing = false;
+      this.mouseCalls = 0;
+    }
+  }
+
+  closePath() {
+    this.map.addPath(this.currPath);
+    this.currPath = new __WEBPACK_IMPORTED_MODULE_0_js_clipper__["Path"]();
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (DrawOnlyInterface);
+
+/***/ }),
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9115,7 +9210,7 @@ class Interface {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9171,7 +9266,7 @@ class Wek {
 /* harmony default export */ __webpack_exports__["a"] = (Wek);
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9232,7 +9327,7 @@ class WekGenerator {
 /* harmony default export */ __webpack_exports__["a"] = (WekGenerator);
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9290,16 +9385,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var rbush = __webpack_require__(25);
-var convexHull = __webpack_require__(22);
-var Queue = __webpack_require__(29);
-var pointInPolygon = __webpack_require__(23);
+var rbush = __webpack_require__(26);
+var convexHull = __webpack_require__(23);
+var Queue = __webpack_require__(30);
+var pointInPolygon = __webpack_require__(24);
 var orient = __webpack_require__(11)[3];
 
 module.exports = concaveman;
@@ -9637,7 +9732,7 @@ function sqSegSegDist(x0, y0, x1, y1, x2, y2, x3, y3) {
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var require;var require;(function(f){if(true){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.PriorityQueue = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return require(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -10029,7 +10124,7 @@ module.exports = BinaryHeapStrategy = (function() {
 });
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10116,7 +10211,7 @@ function monotoneConvexHull2D(points) {
 }
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 module.exports = function (point, vs) {
@@ -10140,7 +10235,7 @@ module.exports = function (point, vs) {
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10207,7 +10302,7 @@ function defaultCompare(a, b) {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10215,7 +10310,7 @@ function defaultCompare(a, b) {
 
 module.exports = rbush;
 
-var quickselect = __webpack_require__(24);
+var quickselect = __webpack_require__(25);
 
 function rbush(maxEntries, format) {
     if (!(this instanceof rbush)) return new rbush(maxEntries, format);
@@ -10775,14 +10870,14 @@ function multiSelect(arr, left, right, n, compare) {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var twoProduct = __webpack_require__(12)
-var twoSum = __webpack_require__(30)
+var twoSum = __webpack_require__(31)
 
 module.exports = scaleLinearExpansion
 
@@ -10831,7 +10926,7 @@ function scaleLinearExpansion(e, scale) {
 }
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10993,7 +11088,7 @@ function robustSubtract(e, f) {
 }
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11155,7 +11250,7 @@ function linearExpansionSum(e, f) {
 }
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11247,7 +11342,7 @@ TinyQueue.prototype = {
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
