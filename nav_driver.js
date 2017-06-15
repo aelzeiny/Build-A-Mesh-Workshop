@@ -13,8 +13,8 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener("resize", resize);
 
   const views = new Array(6);
-  for(let i=1;i<=views.length;i++) {
-    views[i-1] = document.getElementById("step-" + i);
+  for(let i=0;i<=views.length;i++) {
+    views[i] = document.getElementById("step-" + i);
   }
 
   const main = new Main(canvasEl, views);
@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   // Step Flow Events
+  document.getElementById("next-0").addEventListener("click", (e) => main.next(0));
   document.getElementById("next-1").addEventListener("click", (e) => main.next(1));
   document.getElementById("next-2").addEventListener("click", (e) => main.next(2));
   document.getElementById("next-4").addEventListener("click", (e) => main.next(4));
