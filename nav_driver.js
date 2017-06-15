@@ -24,6 +24,8 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("regenAutoma").addEventListener("click", (e) => main.regenAutoma());
   document.getElementById("clipperPlus").addEventListener("click", (e) => main.polygonClip(true));
   document.getElementById("clipperMinus").addEventListener("click", (e) => main.polygonClip(false));
+  document.getElementById("regen").addEventListener("click", (e) => main.regenWek());
+
 
 
   // Step Flow Events
