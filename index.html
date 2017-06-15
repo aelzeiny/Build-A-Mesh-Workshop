@@ -19,8 +19,8 @@
           techniques used by major gaming studios!
         </p>
         <p>
-          Implementing pathfinding on grid-based maps is a fairly basic task.
-          However, real-world spaces are hardly ever so orthogonal or straight-forward.
+          Implementing pathfinding on grid-based maps is a well-documented and straight-forward task.
+          However, real-world spaces are hardly ever so neat and orthogonal.
         </p>
         <p>
           Implementing pathfinding on concave (abstract) polygons is a much more difficult
@@ -77,8 +77,8 @@
         <h3>Drop the player on the map</h3>
         <p>
           Now that you've built a map, we have to configure the mesh for pathfinding.
-          You migh think that every polygon vertex would be a pathfinding node,
-          but we can optimize the number of nodes by only considering vertecies that
+          You might think that every polygon vertex would be a pathfinding node,
+          but we can optimize the number of nodes by only considering vertices that
           are concave (innies) rather than convex (outties). 
         </p>
         <p>
@@ -95,10 +95,10 @@
         </p>
 
         <p>
-          Green polygon verticies are optimal for pathfinding
+          Green polygon vertices are concave (innies), and are optimal for pathfinding
         </p>
         <p>
-          Red polygon verticies aren't necessary for pathfinding
+          Red polygon vertices are convex (outties), and aren't necessary for pathfinding
         </p>
         <button id="next-4">continue</button>
       </div>
