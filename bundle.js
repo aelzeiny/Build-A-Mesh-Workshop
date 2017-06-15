@@ -8975,6 +8975,8 @@ class Wek {
       this.velo = delta.normal().times(VELO);
       this.pos = this.pos.add(this.velo.times(deltaTime));
       if(delta.distanceSq() < EPSILON * EPSILON) {
+        if(this.path.length !== 1)
+          this.pos = this.destination;
         this.destination = (this.path.length > 0) ? this.path.pop() : undefined;
       }
     }
