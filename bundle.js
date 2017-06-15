@@ -9053,12 +9053,19 @@ class WekDriver {
   }
 
   _drawMap(ctx) {
+    ctx.save();
     ctx.lineWidth = 2;
     for(let i=0;i<this.paths.length;i++) {
       const path = this.paths[i];
       ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["c" /* WEK_FORGROUND */];
       if(this.holesI[i])
         ctx.fillStyle = __WEBPACK_IMPORTED_MODULE_1__utils_colors__["d" /* BLUEPRINT */];
+      else {
+        ctx.shadowColor = 'cornflowerblue';
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 5;
+        ctx.shadowOffsetY = 5;
+      }
       ctx.beginPath();
       for(let j=0;j<path.length;j++) {
         ctx.lineTo(path[j].X, path[j].Y);
@@ -9066,6 +9073,7 @@ class WekDriver {
       ctx.closePath();
       ctx.fill();
     }
+    ctx.restore();
   }
 }
 
